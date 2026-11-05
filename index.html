@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+<title>物尽其用 · 家里有什么</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="物尽其用">
+<meta name="theme-color" content="#FCF9F4">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" href="apple-touch-icon.png">
+<link rel="manifest" href="data:application/manifest+json,%7B%22name%22:%22Home%20Inventory%22,%22short_name%22:%22Home%22,%22display%22:%22standalone%22,%22background_color%22:%22%23FCF9F4%22,%22theme_color%22:%22%23FCF9F4%22%7D">
+<style>:root{
+  --bg:#FCF9F4;--card:#FFFFFF;--ink:#2B2721;--muted:#8A8177;--line:#E9E1D5;
+  --soft:#F4EEE4;--accent:#B0632C;--accent-soft:#F8EADC;
+  --green:#2F7A5B;--green-soft:#E6F2EA;--red:#B33A32;--red-soft:#F9E7E4;
+  --blue:#3C6FA8;--blue-soft:#E8F0F8;--teal:#0F6E56;--teal-soft:#E1F5EE;
+  --amber:#9A6412;--amber-soft:#FAEEDA;--gray:#6F6A62;--gray-soft:#F0ECE5;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased;
+}
+button,input,select,textarea{font-family:inherit;font-size:15px;color:inherit}
+button{cursor:pointer}
+.hd{
+  position:sticky;top:0;z-index:20;background:var(--bg);
+  border-bottom:1px solid var(--line);padding:14px 18px 12px;
+  padding-top:calc(14px + env(safe-area-inset-top));
+}
+.hd h1{margin:0;font-size:20px;font-weight:600;letter-spacing:.3px}
+.hd p{margin:2px 0 0;font-size:12px;color:var(--muted)}
+.wrap{padding:16px 16px 110px;max-width:640px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 15px;margin-bottom:12px}
+.sec-t{display:flex;align-items:center;justify-content:space-between;margin:20px 2px 10px}
+.sec-t h2{margin:0;font-size:15px;font-weight:600}
+.sec-t .more{font-size:12px;color:var(--muted)}
+.metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-bottom:12px}
+.metric{background:var(--soft);border-radius:12px;padding:11px 12px}
+.metric .lb{font-size:12px;color:var(--muted);margin:0}
+.metric .vl{font-size:23px;font-weight:600;line-height:1.25;margin:3px 0 0;letter-spacing:-.5px}
+.metric .sub{font-size:11px;color:var(--muted);margin:1px 0 0}
+.metric.hot .vl{color:var(--accent)}
+.banner{background:var(--amber-soft);border:1px solid #F0DDB8;border-radius:12px;padding:11px 13px;margin-bottom:12px;font-size:13px;color:#6F4A0B}
+.banner .row{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.banner.blue{background:var(--blue-soft);border-color:#D6E4F2;color:#2B5780}
+.todo{display:flex;align-items:flex-start;gap:10px;padding:11px 0;border-top:1px solid var(--line)}
+.todo:first-of-type{border-top:0}
+.todo .tx{flex:1;min-width:0;font-size:14px;line-height:1.45}
+.todo .tx small{display:block;color:var(--muted);font-size:12px;margin-top:2px}
+.chk{width:20px;height:20px;flex:0 0 20px;border:1.5px solid #C9BFAE;border-radius:6px;background:#fff;margin-top:1px;padding:0}
+.chk.on{background:var(--green);border-color:var(--green);position:relative}
+.chk.on:after{content:"";position:absolute;left:6px;top:2px;width:5px;height:10px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(42deg)}
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:6px;font-size:11px;line-height:1.5;white-space:nowrap;font-weight:500}
+.badge.amber{background:var(--amber-soft);color:var(--amber)}
+.badge.teal{background:var(--teal-soft);color:var(--teal)}
+.badge.red{background:var(--red-soft);color:var(--red)}
+.badge.green{background:var(--green-soft);color:var(--green)}
+.badge.blue{background:var(--blue-soft);color:var(--blue)}
+.badge.gray{background:var(--gray-soft);color:var(--gray)}
+.bar-row{margin-bottom:11px}
+.bar-row .lg{display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px}
+.bar-row .lg span:last-child{color:var(--muted);font-size:12px}
+.bar{height:7px;border-radius:4px;background:var(--soft);overflow:hidden}
+.bar>i{display:block;height:100%;border-radius:4px;background:#D9903F}
+.bar.hi>i{background:#C4622C}
+.prog{height:8px;border-radius:5px;background:var(--soft);overflow:hidden;margin-top:8px}
+.prog>i{display:block;height:100%;background:var(--green);border-radius:5px}
+.chips{display:flex;gap:7px;overflow-x:auto;padding:2px 0 10px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:0 0 auto;border:1px solid var(--line);background:#fff;border-radius:999px;padding:6px 13px;font-size:13px;color:var(--muted);min-height:32px}
+.chip.on{background:var(--ink);border-color:var(--ink);color:#fff}
+.search{width:100%;border:1px solid var(--line);background:#fff;border-radius:10px;padding:10px 12px;font-size:14px;margin-bottom:10px;outline:none}
+.search:focus{border-color:var(--accent)}
+.item{display:flex;align-items:flex-start;gap:10px;padding:11px 0;border-top:1px solid var(--line)}
+.item:first-child{border-top:0}
+.item .body{flex:1;min-width:0}
+.item .nm{font-size:14px;font-weight:500;word-break:break-all}
+.item .mt{font-size:12px;color:var(--muted);margin-top:3px}
+.item .rt{text-align:right;flex:0 0 auto;display:flex;flex-direction:column;align-items:flex-end;gap:5px}
+.item .pr{font-size:13px;color:var(--ink)}
+.item.done .nm{text-decoration:line-through;color:var(--muted)}
+.grp-t{font-size:12px;color:var(--muted);margin:16px 2px 6px;letter-spacing:.5px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:42px;padding:9px 15px;border:1px solid var(--line);border-radius:10px;background:#fff;font-size:14px;color:var(--ink)}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:500}
+.btn.dan{color:var(--red);border-color:#EBCCCA}
+.btn.sm{min-height:32px;padding:5px 10px;font-size:12px;border-radius:8px}
+.btn.full{width:100%}
+.btn:active{opacity:.75}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap}
+.btn-row>.btn{flex:1}
+label.fl{display:block;font-size:12px;color:var(--muted);margin:0 0 5px}
+.field{margin-bottom:12px}
+.inp,textarea.inp,select.inp{width:100%;border:1px solid var(--line);background:#fff;border-radius:10px;padding:10px 12px;font-size:14px;outline:none;min-height:42px}
+.inp:focus,textarea.inp:focus,select.inp:focus{border-color:var(--accent)}
+textarea.inp{min-height:150px;resize:vertical;line-height:1.7;font-size:14px}
+.hint{font-size:12px;color:var(--muted);line-height:1.6;margin:6px 0 0}
+.hint code{background:var(--soft);padding:1px 5px;border-radius:4px;font-size:12px}
+.pv{border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-top:10px}
+.pv .r{display:flex;gap:8px;padding:7px 10px;border-top:1px solid var(--line);font-size:12px;align-items:center}
+.pv .r:first-child{border-top:0;background:var(--soft);color:var(--muted)}
+.pv .r .a{flex:1;min-width:0;word-break:break-all}
+.pv .r .b{width:74px;color:var(--muted)}
+.pv .r .c{width:60px}
+.place-row{display:flex;align-items:center;gap:9px;padding:9px 0;border-top:1px solid var(--line);font-size:14px}
+.place-row:first-child{border-top:0}
+.place-row .pnm{flex:1}
+.place-row .cnt{font-size:12px;color:var(--muted)}
+.kv{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-top:1px solid var(--line);font-size:13px}
+.kv:first-child{border-top:0}
+.kv span:last-child{font-weight:500}
+.empty{text-align:center;color:var(--muted);font-size:13px;padding:26px 12px;line-height:1.7}
+.tiny{font-size:12px;color:var(--muted)}
+.divider{height:1px;background:var(--line);margin:14px 0}
+.tabbar{
+  position:fixed;left:0;right:0;bottom:0;z-index:30;display:grid;grid-template-columns:repeat(4,1fr);
+  background:rgba(255,255,255,.97);border-top:1px solid var(--line);
+  padding:6px 4px calc(6px + env(safe-area-inset-bottom));
+}
+.tab{border:0;background:transparent;display:flex;flex-direction:column;align-items:center;gap:3px;padding:5px 0;color:var(--muted);font-size:11px;min-height:48px}
+.tab.on{color:var(--accent)}
+.tab .ico{width:22px;height:22px;display:block}
+.modal{position:fixed;inset:0;z-index:50;background:rgba(35,30,24,.42);display:flex;align-items:flex-end;justify-content:center}
+.modal[hidden]{display:none}
+.sheet{background:var(--bg);width:100%;max-width:640px;border-radius:18px 18px 0 0;max-height:90vh;overflow-y:auto;padding:18px 16px calc(24px + env(safe-area-inset-bottom))}
+.sheet h3{margin:0 0 4px;font-size:17px;font-weight:600}
+.sheet .sub{font-size:12px;color:var(--muted);margin:0 0 16px}
+.toast{position:fixed;z-index:80;left:50%;bottom:96px;transform:translateX(-50%);background:rgba(43,39,33,.94);color:#fff;font-size:13px;padding:10px 16px;border-radius:10px;max-width:86%;text-align:center}
+.toast[hidden]{display:none}
+.footnote{text-align:center;font-size:11px;color:var(--muted);padding:8px 0 4px;line-height:1.7}
+.sug{background:var(--soft);border-radius:10px;padding:10px 12px;font-size:13px;margin-bottom:12px}
+.sug b{font-weight:600}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<nav id="tabbar" class="tabbar"></nav>
+<div id="modal" class="modal" hidden></div>
+<div id="toast" class="toast" hidden></div>
+<script>/* 物尽其用 · 静态配置与示例数据 */
+window.CFG = (function () {
+  'use strict';
+
+  var CATS = ['护肤', '彩妆', '个护', '电器', '数码', '衣物', '药品', '书籍', '厨房', '清洁', '工具', '其他'];
+
+  var KEYWORD_PAIRS = [
+    ['空气炸锅', '电器'], ['电饭煲', '电器'], ['吸尘器', '电器'], ['扫地机器人', '电器'],
+    ['破壁机', '电器'], ['榨汁机', '电器'], ['咖啡机', '电器'], ['吹风机', '电器'],
+    ['卷发棒', '电器'], ['直发梳', '电器'], ['电磁炉', '电器'], ['加湿器', '电器'],
+    ['净化器', '电器'], ['电风扇', '电器'], ['取暖器', '电器'], ['电熨斗', '电器'],
+    ['豆浆机', '电器'], ['面包机', '电器'], ['微波炉', '电器'], ['电煮锅', '电器'],
+    ['电水壶', '电器'], ['电烤箱', '电器'], ['烤箱', '电器'], ['蒸锅', '电器'],
+    ['电动牙刷', '电器'], ['美容仪', '电器'], ['按摩仪', '电器'], ['剃须刀', '电器'],
+    ['投影仪', '数码'], ['充电宝', '数码'], ['数据线', '数码'], ['充电器', '数码'],
+    ['蓝牙耳机', '数码'], ['耳机', '数码'], ['充电头', '数码'], ['移动硬盘', '数码'],
+    ['路由器', '数码'], ['游戏机', '数码'], ['智能手表', '数码'], ['机械键盘', '数码'],
+    ['键盘', '数码'], ['鼠标', '数码'], ['相机', '数码'], ['音箱', '数码'],
+    ['平板', '数码'], ['iPad', '数码'], ['手机', '数码'], ['手表', '数码'], ['U盘', '数码'],
+    ['爽肤水', '护肤'], ['化妆水', '护肤'], ['收敛水', '护肤'], ['精华液', '护肤'],
+    ['小棕瓶', '护肤'], ['神仙水', '护肤'], ['面霜', '护肤'], ['眼霜', '护肤'],
+    ['乳液', '护肤'], ['水乳', '护肤'], ['面膜', '护肤'], ['防晒霜', '护肤'],
+    ['防晒', '护肤'], ['洁面', '护肤'], ['洗面奶', '护肤'], ['卸妆水', '护肤'],
+    ['卸妆油', '护肤'], ['身体乳', '护肤'], ['护手霜', '护肤'], ['润唇膏', '护肤'],
+    ['凡士林', '护肤'], ['安瓶', '护肤'], ['原液', '护肤'], ['芦荟胶', '护肤'],
+    ['精油', '护肤'], ['喷雾', '护肤'], ['精华', '护肤'], ['面油', '护肤'],
+    ['粉底液', '彩妆'], ['睫毛膏', '彩妆'], ['指甲油', '彩妆'], ['遮瑕', '彩妆'],
+    ['口红', '彩妆'], ['唇釉', '彩妆'], ['眼影', '彩妆'], ['腮红', '彩妆'],
+    ['眉笔', '彩妆'], ['散粉', '彩妆'], ['气垫', '彩妆'], ['高光', '彩妆'],
+    ['修容', '彩妆'], ['粉饼', '彩妆'],
+    ['洗发水', '个护'], ['护发素', '个护'], ['沐浴露', '个护'], ['染发膏', '个护'],
+    ['牙膏', '个护'], ['牙刷', '个护'], ['卫生巾', '个护'], ['棉柔巾', '个护'],
+    ['香水', '个护'], ['洗手液', '个护'],
+    ['维生素', '药品'], ['保健品', '药品'], ['创可贴', '药品'], ['退烧药', '药品'],
+    ['感冒药', '药品'], ['钙片', '药品'], ['口罩', '药品'], ['药箱', '药品'], ['药', '药品'],
+    ['羽绒服', '衣物'], ['冲锋衣', '衣物'], ['衬衫', '衣物'], ['外套', '衣物'],
+    ['毛衣', '衣物'], ['裤子', '衣物'], ['裙子', '衣物'], ['袜子', '衣物'],
+    ['内衣', '衣物'], ['围巾', '衣物'], ['帽子', '衣物'], ['背包', '衣物'],
+    ['皮带', '衣物'], ['运动鞋', '衣物'], ['T恤', '衣物'], ['包', '衣物'], ['鞋', '衣物'],
+    ['螺丝刀', '工具'], ['工具箱', '工具'], ['钳子', '工具'], ['胶带', '工具'],
+    ['剪刀', '工具'], ['电池', '工具'], ['灯泡', '工具'], ['插线板', '工具'],
+    ['洗衣液', '清洁'], ['消毒液', '清洁'], ['垃圾袋', '清洁'], ['垃圾桶', '清洁'],
+    ['拖把', '清洁'], ['扫把', '清洁'], ['纸巾', '清洁'], ['抹布', '清洁'],
+    ['保鲜盒', '厨房'], ['餐具', '厨房'], ['茶具', '厨房'], ['饭盒', '厨房'],
+    ['炒锅', '厨房'], ['刀具', '厨房'], ['保温杯', '厨房'], ['杯子', '厨房'],
+    ['碗', '厨房'], ['盘', '厨房'], ['锅', '厨房'],
+    ['笔记本', '书籍'], ['绘本', '书籍'], ['杂志', '书籍'], ['书', '书籍']
+  ].sort(function (a, b) { return b[0].length - a[0].length; });
+
+  var STATUS_META = {
+    using: { label: '在用', tone: 'green' },
+    sealed: { label: '未拆封', tone: 'blue' },
+    idle: { label: '闲置', tone: 'amber' }
+  };
+
+  var ACTION_META = {
+    use: { label: '用起来', tone: 'amber' },
+    sell: { label: '卖掉', tone: 'teal' },
+    give: { label: '送人', tone: 'teal' },
+    discard: { label: '丢弃', tone: 'red' },
+    keep: { label: '合理保留', tone: 'gray' }
+  };
+
+  var LOW_FREQ_CATS = ['工具', '药品', '清洁'];
+
+  var DEMO_PLACES = [
+    { name: '卫生间镜柜', done: 1 },
+    { name: '洗手台下', done: 1 },
+    { name: '卧室抽屉', done: 1 },
+    { name: '储物间', done: 0 },
+    { name: '厨房吊柜', done: 0 },
+    { name: '书房抽屉', done: 0 },
+    { name: '玄关抽屉', done: 0 },
+    { name: '药箱', done: 0 },
+    { name: '阳台工具箱', done: 0 }
+  ];
+
+  function dayOffset(n) {
+    var t = new Date();
+    t.setDate(t.getDate() + n);
+    var p = function (x) { return String(x).padStart(2, '0'); };
+    return t.getFullYear() + '-' + p(t.getMonth() + 1) + '-' + p(t.getDate());
+  }
+
+  /* 名称, 位置, 状态, 原价, 购入日偏移, 最后使用日偏移, 开封日偏移, 开封保质期(月) */
+  var DEMO_ROWS = [
+    ['雅诗兰黛小棕瓶精华', '卫生间镜柜', 'sealed', 780, -420, 0, 0, 0],
+    ['雅诗兰黛小棕瓶精华', '卫生间镜柜', 'sealed', 780, -400, 0, 0, 0],
+    ['SK-II 神仙水 230ml', '卫生间镜柜', 'idle', 1200, -620, -540, -500, 12],
+    ['兰蔻菁纯面霜', '卫生间镜柜', 'idle', 680, -400, -320, -300, 12],
+    ['安耐晒防晒霜', '储物间', 'sealed', 220, -260, 0, 0, 0],
+    ['安耐晒防晒霜', '储物间', 'sealed', 220, -250, 0, 0, 0],
+    ['敷尔佳面膜 3 盒', '储物间', 'sealed', 150, -200, 0, 0, 0],
+    ['城野医生收敛水', '卫生间镜柜', 'idle', 180, -460, -400, 0, 0],
+    ['凡士林身体乳', '卧室抽屉', 'using', 69, -90, -3, 0, 0],
+    ['空气炸锅', '厨房吊柜', 'idle', 399, -700, -500, 0, 0],
+    ['破壁机', '厨房吊柜', 'idle', 599, -800, -620, 0, 0],
+    ['卷发棒', '卧室抽屉', 'idle', 199, -600, -430, 0, 0],
+    ['加湿器', '卧室', 'using', 299, -500, -10, 0, 0],
+    ['戴森吹风机', '洗手台下', 'using', 2990, -900, -2, 0, 0],
+    ['iPad mini 6', '书房抽屉', 'idle', 2199, -900, -540, 0, 0],
+    ['充电宝 20000mAh', '玄关抽屉', 'idle', 129, -500, -300, 0, 0],
+    ['充电宝 10000mAh', '玄关抽屉', 'idle', 89, -500, -300, 0, 0],
+    ['维生素 C 泡腾片', '药箱', 'using', 49, -60, -5, 0, 0],
+    ['螺丝刀套装', '阳台工具箱', 'idle', 79, -900, -700, 0, 0]
+  ];
+
+  function demoItems() {
+    return DEMO_ROWS.map(function (r, i) {
+      return {
+        id: 'demo-' + (i + 1),
+        name: r[0],
+        place: r[1],
+        cat: '',
+        status: r[2],
+        price: r[3],
+        boughtAt: r[4] ? dayOffset(r[4]) : '',
+        lastUsedAt: r[5] ? dayOffset(r[5]) : '',
+        openedAt: r[6] ? dayOffset(r[6]) : '',
+        pao: r[7] || 0,
+        action: '',
+        suggestPrice: 0,
+        done: 0,
+        doneAt: '',
+        soldPrice: 0,
+        note: '',
+        createdAt: dayOffset(-30)
+      };
+    });
+  }
+
+  return {
+    CATS: CATS,
+    KEYWORD_PAIRS: KEYWORD_PAIRS,
+    STATUS_META: STATUS_META,
+    ACTION_META: ACTION_META,
+    LOW_FREQ_CATS: LOW_FREQ_CATS,
+    DEMO_PLACES: DEMO_PLACES,
+    dayOffset: dayOffset,
+    demoItems: demoItems
+  };
+})();
+</script>
+<script>/* 物尽其用 · 应用逻辑 */
+(function () {
+  'use strict';
+
+  var C = window.CFG;
+  var KEY = 'wjy_inventory_v1';
+  var TABS = ['today', 'list', 'add', 'data'];
+  var S = null;
+  var curTab = 'today';
+  var ui = {
+    q: '', filter: 'all', group: 'cat', sort: 'idle',
+    draft: '', defPlace: '', defAge: '365', newPlace: '',
+    preview: null, editId: null, focusQ: false
+  };
+
+  var ICONS = {
+    today: '<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5.5 9.5V20h13V9.5"/><path d="M9.5 20v-6h5v6"/></svg>',
+    list: '<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M8 6h13M8 12h13M8 18h13"/><circle cx="3.5" cy="6" r="1"/><circle cx="3.5" cy="12" r="1"/><circle cx="3.5" cy="18" r="1"/></svg>',
+    add: '<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>',
+    data: '<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16"/><path d="M6 20v-6M11 20V7M16 20v-9M21 20v-4"/></svg>'
+  };
+  var TAB_LABEL = { today: '今天', list: '清单', add: '录入', data: '数据' };
+
+  function $(s) { return document.querySelector(s); }
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function uid() { return 'i' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+  function today() { return C.dayOffset(0); }
+  function n2(x) { return String(x).padStart(2, '0'); }
+  function parseDate(s) { return new Date(String(s) + 'T00:00:00'); }
+  function dayDiff(a, b) {
+    if (!a) return 0;
+    var d1 = parseDate(a), d2 = parseDate(b || today());
+    if (isNaN(d1.getTime()) || isNaN(d2.getTime())) return 0;
+    return Math.round((d2 - d1) / 86400000);
+  }
+  function money(n) { return '¥' + (Math.round(Number(n) || 0)).toLocaleString('zh-CN'); }
+  function pct(a, b) { return b ? Math.round(a * 100 / b) : 0; }
+
+  function guessCat(name) {
+    var low = String(name || '').toLowerCase();
+    for (var i = 0; i < C.KEYWORD_PAIRS.length; i++) {
+      if (low.indexOf(C.KEYWORD_PAIRS[i][0].toLowerCase()) >= 0) return C.KEYWORD_PAIRS[i][1];
+    }
+    return '其他';
+  }
+
+  function paoLeft(it) {
+    if (!it.openedAt || !Number(it.pao)) return null;
+    var d = parseDate(it.openedAt);
+    if (isNaN(d.getTime())) return null;
+    d.setMonth(d.getMonth() + Number(it.pao));
+    var expiry = d.getFullYear() + '-' + n2(d.getMonth() + 1) + '-' + n2(d.getDate());
+    return -dayDiff(expiry, today());
+  }
+
+  function idleDays(it) {
+    var base = it.lastUsedAt || it.boughtAt || it.createdAt || today();
+    return Math.max(0, dayDiff(base, today()));
+  }
+
+  function resalePrice(it) {
+    var p = Number(it.price) || 0;
+    if (!p) return 0;
+    var r;
+    if (it.cat === '电器' || it.cat === '数码') {
+      var yrs = Math.max(0, dayDiff(it.boughtAt || it.createdAt, today()) / 365);
+      r = (it.cat === '数码' ? 0.42 : 0.5) * Math.pow(0.82, yrs);
+      r = Math.max(0.12, Math.min(0.7, r));
+    } else if (it.status === 'sealed') {
+      r = 0.62;
+    } else if (it.openedAt) {
+      r = it.cat === '护肤' ? 0.12 : 0.2;
+    } else {
+      r = 0.3;
+    }
+    return Math.round(p * r / 10) * 10;
+  }
+
+  function blankState() {
+    return {
+      version: 1, items: [], places: [], demo: 0, createdAt: today(),
+      settings: { addSinceBackup: 0, lastBackupAt: '' }
+    };
+  }
+
+  function catCount(cat) {
+    return S.items.filter(function (x) { return !x.done && x.cat === cat; }).length;
+  }
+
+  function suggest(it) {
+    var left = paoLeft(it), idle = idleDays(it), price = resalePrice(it), cc = catCount(it.cat);
+    if (left !== null && left < 0) return { action: 'discard', reason: '已过开封保质期 ' + (-left) + ' 天', price: 0 };
+    if (it.status === 'using') return { action: 'keep', reason: '正在使用，无需处理', price: 0 };
+    if (left !== null && left <= 90) return { action: 'use', reason: '距开封保质期只剩 ' + left + ' 天，优先用完', price: 0 };
+    if (C.LOW_FREQ_CATS.indexOf(it.cat) >= 0 && idle > 180) return { action: 'keep', reason: '低频但必要，合理保留', price: 0 };
+    if ((it.cat === '电器' || it.cat === '数码') && idle >= 365) return { action: 'sell', reason: '闲置超过 1 年，折旧快，越晚卖越不值钱', price: price };
+    if (it.status === 'sealed' && cc >= 3) return { action: 'sell', reason: '同类已有 ' + cc + ' 件，未拆封残值最高，适合转卖', price: price };
+    if (it.status === 'sealed' && idle >= 180) return { action: 'use', reason: '未拆封闲置 ' + idle + ' 天，尽快拆来用', price: 0 };
+    if (idle >= 180) return { action: 'use', reason: '已闲置 ' + idle + ' 天，放到显眼处用起来', price: 0 };
+    return { action: 'keep', reason: '近期还在用，先留着', price: 0 };
+  }
+
+  function applySuggest(it) {
+    var s = suggest(it);
+    it.action = s.action;
+    it.suggestPrice = s.price;
+    it.reason = s.reason;
+  }
+
+  function load() {
+    try {
+      var raw = localStorage.getItem(KEY);
+      if (raw) {
+        var o = JSON.parse(raw);
+        if (o && Array.isArray(o.items)) { S = o; ensureShape(); return; }
+      }
+    } catch (e) { /* 隐私模式下忽略 */ }
+    S = blankState();
+    S.items = C.demoItems();
+    S.items.forEach(function (it) { it.cat = guessCat(it.name); });
+    S.places = C.DEMO_PLACES.map(function (p, i) { return { id: 'p' + (i + 1), name: p.name, done: p.done }; });
+    S.demo = 1;
+    S.items.forEach(applySuggest);
+    ['demo-1', 'demo-2', 'demo-8'].forEach(function (id) {
+      var it = find(id);
+      if (it) { it.action = ''; it.reason = ''; it.suggestPrice = 0; }
+    });
+    save();
+  }
+
+  function ensureShape() {
+    if (!S.places) S.places = [];
+    if (!S.settings) S.settings = { addSinceBackup: 0, lastBackupAt: '' };
+    S.items.forEach(function (it) {
+      if (!it.cat) it.cat = guessCat(it.name);
+      if (it.done === undefined) it.done = 0;
+      if (it.suggestPrice === undefined) it.suggestPrice = 0;
+      if (it.soldPrice === undefined) it.soldPrice = 0;
+      if (!it.reason) it.reason = '';
+    });
+  }
+
+  function save() {
+    try { localStorage.setItem(KEY, JSON.stringify(S)); }
+    catch (e) { toast('记录不会保存，请检查浏览器隐私设置'); }
+  }
+
+  function find(id) {
+    for (var i = 0; i < S.items.length; i++) if (S.items[i].id === id) return S.items[i];
+    return null;
+  }
+
+  function stats() {
+    var all = S.items;
+    var active = all.filter(function (x) { return !x.done; });
+    var using = active.filter(function (x) { return x.status === 'using'; });
+    var idle = active.filter(function (x) { return x.status !== 'using'; });
+    var sunk = idle.reduce(function (a, b) { return a + (Number(b.price) || 0); }, 0);
+    var pending = active.filter(function (x) { return !x.action; });
+    var toSell = active.filter(function (x) { return x.action === 'sell'; });
+    var sellSum = toSell.reduce(function (a, b) { return a + (Number(b.suggestPrice) || 0); }, 0);
+    var sold = all.filter(function (x) { return x.done && Number(x.soldPrice) > 0; })
+      .reduce(function (a, b) { return a + Number(b.soldPrice); }, 0);
+    var m = today().slice(0, 7);
+    var usedUp = all.filter(function (x) { return x.done && x.action === 'use' && String(x.doneAt || '').slice(0, 7) === m; }).length;
+    var donePlaces = S.places.filter(function (p) { return p.done; }).length;
+
+    var catMap = {}, placeMap = {};
+    active.forEach(function (x) {
+      var c = x.cat || '其他';
+      if (!catMap[c]) catMap[c] = { name: c, total: 0, idle: 0 };
+      catMap[c].total++;
+      if (x.status !== 'using') catMap[c].idle++;
+      var p = x.place || '未标注';
+      if (!placeMap[p]) placeMap[p] = { name: p, total: 0, idle: 0 };
+      placeMap[p].total++;
+      if (x.status !== 'using') placeMap[p].idle++;
+    });
+    var cats = Object.keys(catMap).map(function (k) {
+      var o = catMap[k]; o.rate = pct(o.idle, o.total); return o;
+    }).sort(function (a, b) { return b.idle - a.idle || b.rate - a.rate || b.total - a.total; });
+    var places = Object.keys(placeMap).map(function (k) { return placeMap[k]; })
+      .sort(function (a, b) { return b.idle - a.idle || b.total - a.total; });
+
+    return {
+      total: all.length, active: active.length, using: using.length,
+      idle: idle.length, idleRate: pct(idle.length, active.length), sunk: sunk,
+      pending: pending.length, toSell: toSell.length, sellSum: sellSum,
+      sold: sold, usedUp: usedUp, cats: cats, places: places,
+      placesDone: donePlaces, placesTotal: S.places.length
+    };
+  }
+
+  function todoItems() {
+    var prio = { discard: 0, use: 1, give: 2, sell: 3 };
+    var pool = S.items.filter(function (x) { return !x.done && x.action && x.action !== 'keep'; });
+    var sorted = pool.slice().sort(function (a, b) {
+      var pa = prio[a.action] === undefined ? 9 : prio[a.action];
+      var pb = prio[b.action] === undefined ? 9 : prio[b.action];
+      var d = pa - pb;
+      if (d) return d;
+      if (a.action === 'use' || b.action === 'use') {
+        var la = paoLeft(a), lb = paoLeft(b);
+        if (la !== null || lb !== null) return (la === null ? 9999 : la) - (lb === null ? 9999 : lb);
+      }
+      if (a.action === 'sell') return (Number(b.suggestPrice) || 0) - (Number(a.suggestPrice) || 0);
+      return idleDays(b) - idleDays(a);
+    });
+    var picked = [], used = {};
+    ['discard', 'use', 'sell'].forEach(function (k) {
+      var it = sorted.filter(function (x) { return x.action === k && !used[x.id]; })[0];
+      if (it) { picked.push(it); used[it.id] = 1; }
+    });
+    sorted.forEach(function (it) {
+      if (picked.length < 3 && !used[it.id]) { picked.push(it); used[it.id] = 1; }
+    });
+    return picked.slice(0, 3);
+  }
+
+  function todoText(it) {
+    var n = '「' + it.name + '」';
+    if (it.action === 'discard') return { main: '处理掉 ' + n, sub: it.reason || '已过期或不适用', badge: '丢弃', tone: 'red' };
+    if (it.action === 'sell') return { main: '把 ' + n + ' 挂闲鱼', sub: '建议价 ' + money(it.suggestPrice) + ' · ' + (it.reason || ''), badge: '约 ' + money(it.suggestPrice), tone: 'teal' };
+    if (it.action === 'give') return { main: '把 ' + n + ' 送人', sub: it.reason || '', badge: '送人', tone: 'teal' };
+    return { main: '开始用 ' + n, sub: it.reason || '', badge: '开始用', tone: 'amber' };
+  }
+
+  function toast(msg) {
+    var t = $('#toast');
+    t.textContent = msg;
+    t.hidden = false;
+    clearTimeout(toast._t);
+    toast._t = setTimeout(function () { t.hidden = true; }, 2400);
+  }
+
+  function header(title, sub) {
+    return '<div class="hd"><h1>' + esc(title) + '</h1><p>' + esc(sub) + '</p></div>';
+  }
+
+  function badge(label, tone) { return '<span class="badge ' + tone + '">' + esc(label) + '</span>'; }
+
+  function renderToday() {
+    var st = stats();
+    var h = header('家里有什么', '物尽其用 · 共 ' + st.total + ' 件 · 闲置率 ' + st.idleRate + '%');
+    h += '<div class="wrap">';
+
+    if (S.demo) {
+      h += '<div class="banner"><div class="row"><span>这是示例数据，先点一点看效果</span>' +
+        '<button class="btn sm" data-act="clear-demo">清空示例</button></div></div>';
+    }
+    if (st.pending > 0) {
+      h += '<div class="banner blue"><div class="row"><span>还有 ' + st.pending + ' 件没定去处</span>' +
+        '<button class="btn sm" data-act="apply-all">生成建议</button></div></div>';
+    }
+    if (S.settings.addSinceBackup >= 20) {
+      h += '<div class="banner"><div class="row"><span>已新增 ' + S.settings.addSinceBackup + ' 件，建议导出备份</span>' +
+        '<button class="btn sm" data-act="export-json">立即备份</button></div></div>';
+    }
+
+    h += '<div class="metrics">' +
+      '<div class="metric"><p class="lb">在用</p><p class="vl">' + st.using + '</p><p class="sub">件</p></div>' +
+      '<div class="metric hot"><p class="lb">闲置</p><p class="vl">' + st.idle + '</p><p class="sub">含未拆封</p></div>' +
+      '<div class="metric"><p class="lb">沉淀原价</p><p class="vl" style="font-size:19px">' + money(st.sunk) + '</p><p class="sub">未在用物品</p></div>' +
+      '</div>';
+
+    h += '<div class="sec-t"><h2>今天做这 3 件事</h2><span class="more">只挑最要紧的</span></div><div class="card">';
+    var todos = todoItems();
+    if (!todos.length) {
+      h += '<div class="empty">暂时没有待办。<br>去「清单」给物品定个去处，或先录入几件。</div>' +
+        '<button class="btn full" data-act="goto" data-tab="add">去录入</button>';
+    } else {
+      todos.forEach(function (it) {
+        var t = todoText(it);
+        h += '<div class="todo"><button class="chk" data-act="today-done" data-id="' + esc(it.id) + '" aria-label="完成"></button>' +
+          '<div class="tx">' + esc(t.main) + '<small>' + esc(t.sub) + '</small></div>' +
+          badge(t.badge, t.tone) + '</div>';
+      });
+    }
+    h += '</div>';
+
+    h += '<div class="sec-t"><h2>闲置率 · 按类目</h2><span class="more">找重灾区</span></div><div class="card">';
+    if (!st.cats.length) h += '<div class="empty">还没有物品</div>';
+    st.cats.slice(0, 6).forEach(function (c) {
+      h += '<div class="bar-row"><div class="lg"><span>' + esc(c.name) + '</span><span>' + c.rate + '% · ' + c.total + ' 件</span></div>' +
+        '<div class="bar' + (c.rate >= 60 ? ' hi' : '') + '"><i style="width:' + c.rate + '%"></i></div></div>';
+    });
+    h += '</div>';
+
+    h += '<div class="sec-t"><h2>清点进度</h2><span class="more">一次只清一个柜子</span></div><div class="card">' +
+      '<div style="display:flex;justify-content:space-between;font-size:14px"><span>已清点位置</span><span>' + st.placesDone + ' / ' + st.placesTotal + '</span></div>' +
+      '<div class="prog"><i style="width:' + pct(st.placesDone, st.placesTotal) + '%"></i></div>' +
+      '<p class="hint">按位置分批录入，不要一次面对全部 ' + st.total + ' 件。</p>' +
+      '<div style="margin-top:12px"><button class="btn full" data-act="goto" data-tab="add">继续清点下一个位置</button></div></div>';
+
+    h += '<div class="card"><div class="kv"><span>待卖</span><span>' + st.toSell + ' 件</span></div>' +
+      '<div class="kv"><span>预计回款</span><span>' + money(st.sellSum) + '</span></div>' +
+      '<div class="kv"><span>已回款</span><span>' + money(st.sold) + '</span></div>' +
+      '<div class="kv"><span>本月已用起</span><span>' + st.usedUp + ' 件</span></div>' +
+      '<div style="margin-top:12px"><button class="btn full" data-act="goto" data-tab="list">去看待卖清单</button></div></div>';
+
+    h += '<div class="footnote">数据只存在这台设备的浏览器里 · 记得定期导出备份</div></div>';
+    return h;
+  }
+
+  function itemRow(it) {
+    var am = C.ACTION_META[it.action];
+    var b = it.done ? badge('已处理', 'green') : (am ? badge(am.label, am.tone) : badge('待决策', 'gray'));
+    var sm = C.STATUS_META[it.status] || C.STATUS_META.idle;
+    var meta = it.cat + ' · ' + (it.place || '未标注') + ' · ' + sm.label + ' · 闲置 ' + idleDays(it) + ' 天';
+    return '<div class="item' + (it.done ? ' done' : '') + '" data-act="edit" data-id="' + esc(it.id) + '">' +
+      '<div class="body"><div class="nm">' + esc(it.name) + '</div><div class="mt">' + esc(meta) + '</div></div>' +
+      '<div class="rt"><span class="pr">' + (Number(it.price) ? money(it.price) : '—') + '</span>' + b + '</div></div>';
+  }
+
+  function filteredItems() {
+    var q = ui.q.trim().toLowerCase();
+    var arr = S.items.filter(function (it) {
+      if (q && (it.name + ' ' + it.cat + ' ' + it.place + ' ' + (it.note || '')).toLowerCase().indexOf(q) < 0) return false;
+      switch (ui.filter) {
+        case 'pending': return !it.done && !it.action;
+        case 'idle': return !it.done && it.status !== 'using';
+        case 'sell': return !it.done && it.action === 'sell';
+        case 'use': return !it.done && it.action === 'use';
+        case 'done': return !!it.done;
+        default: return !it.done;
+      }
+    });
+    arr.sort(function (a, b) {
+      if (ui.sort === 'new') return String(b.createdAt || '').localeCompare(String(a.createdAt || '')) || b.id.localeCompare(a.id);
+      if (ui.sort === 'price') return (Number(b.price) || 0) - (Number(a.price) || 0);
+      return idleDays(b) - idleDays(a);
+    });
+    return arr;
+  }
+
+  function chipRow(items, key, act) {
+    return '<div class="chips">' + items.map(function (o) {
+      return '<button class="chip' + (ui[key] === o.v ? ' on' : '') + '" data-act="' + act + '" data-v="' + esc(o.v) + '">' + esc(o.l) + '</button>';
+    }).join('') + '</div>';
+  }
+
+  function listBodyHTML() {
+    var h = '', arr = filteredItems();
+    if (!arr.length) {
+      h += '<div class="card"><div class="empty">这个筛选下没有物品。<br>换个条件，或去「录入」加几件。</div></div>';
+    } else if (ui.group === 'none') {
+      h += '<div class="card">' + arr.map(itemRow).join('') + '</div>';
+    } else {
+      var groups = {};
+      arr.forEach(function (it) {
+        var k = ui.group === 'cat' ? (it.cat || '其他') : (it.place || '未标注');
+        if (!groups[k]) groups[k] = [];
+        groups[k].push(it);
+      });
+      Object.keys(groups).sort(function (a, b) { return groups[b].length - groups[a].length; }).forEach(function (k) {
+        h += '<div class="grp-t">' + esc(k) + ' · ' + groups[k].length + ' 件</div><div class="card">' + groups[k].map(itemRow).join('') + '</div>';
+      });
+    }
+    return h;
+  }
+
+  function renderList() {
+    var st = stats();
+    var h = header('全部物品', '共 ' + st.total + ' 件 · 在用 ' + st.using + ' 件 · 闲置 ' + st.idle + ' 件');
+    h += '<div class="wrap">';
+    h += '<input class="search" id="q" placeholder="搜名称 / 位置 / 类目，买之前先搜一下" value="' + esc(ui.q) + '">';
+    h += chipRow([
+      { v: 'all', l: '全部' }, { v: 'pending', l: '待决策 ' + st.pending },
+      { v: 'idle', l: '闲置' }, { v: 'sell', l: '待卖 ' + st.toSell },
+      { v: 'use', l: '用起来' }, { v: 'done', l: '已归档' }
+    ], 'filter', 'filter');
+    h += chipRow([{ v: 'cat', l: '按类目' }, { v: 'place', l: '按位置' }, { v: 'none', l: '不分组' }], 'group', 'group');
+    h += chipRow([{ v: 'idle', l: '闲置最久' }, { v: 'price', l: '金额最高' }, { v: 'new', l: '最近添加' }], 'sort', 'sort');
+    h += '<div class="btn-row" style="margin-bottom:12px"><button class="btn sm" data-act="apply-all">一键采纳建议</button>' +
+      '<button class="btn sm" data-act="goto" data-tab="add">批量录入</button></div>';
+    h += '<div id="listBody">' + listBodyHTML() + '</div>';
+    h += '<div class="footnote">点任意一件可改状态、日期、价格和处置方式</div></div>';
+    return h;
+  }
+
+  function parseBulk(text, defPlace) {
+    var lines = String(text || '').split(/\r?\n/).map(function (s) { return s.trim(); }).filter(Boolean);
+    return lines.map(function (line) {
+      var toks = line.split(/\s+/), parts = [], place = '', cat = '', st = '', price = 0, age = null;
+      toks.forEach(function (t) {
+        if (t.charAt(0) === '@') place = t.slice(1);
+        else if (t.charAt(0) === '#') cat = t.slice(1);
+        else if (t.charAt(0) === '~') st = t.slice(1);
+        else if (t.charAt(0) === '¥' || t.charAt(0) === '￥') price = parseFloat(t.slice(1)) || 0;
+        else parts.push(t);
+      });
+      var hasTag = place || cat || st || price;
+      if (!hasTag && parts.length > 1 && C.CATS.indexOf(parts[parts.length - 1]) >= 0) {
+        cat = parts.pop();
+      }
+      var name = parts.join(' ').trim();
+      if (!name) return null;
+      if (C.CATS.indexOf(cat) < 0) cat = '';
+      if (!cat) cat = guessCat(name);
+      place = place || defPlace || '未标注位置';
+
+      var status = 'idle', last = '';
+      var tag = st || ui.defAge;
+      if (tag.indexOf('在用') >= 0) status = 'using';
+      else if (tag.indexOf('未拆') >= 0 || tag.indexOf('未开') >= 0 || tag === 'sealed') status = 'sealed';
+      else {
+        status = 'idle';
+        var days = 0;
+        if (/半年/.test(tag)) days = 180;
+        else if (/(\d+)\s*年/.test(tag)) days = parseInt(RegExp.$1, 10) * 365;
+        else if (/(\d+)\s*个?月/.test(tag)) days = parseInt(RegExp.$1, 10) * 30;
+        else if (/(\d+)\s*天/.test(tag)) days = parseInt(RegExp.$1, 10);
+        else if (/^\d+$/.test(tag)) days = parseInt(tag, 10);
+        if (days > 0) last = C.dayOffset(-days);
+      }
+      if (status === 'using') last = today();
+      return {
+        id: uid(), name: name, place: place, cat: cat, status: status, price: price,
+        boughtAt: '', lastUsedAt: last, openedAt: '', pao: 0,
+        action: '', suggestPrice: 0, reason: '', done: 0, doneAt: '', soldPrice: 0,
+        note: '', createdAt: today()
+      };
+    }).filter(Boolean);
+  }
+
+  function previewHTML(items) {
+    if (!items || !items.length) return '<div class="empty">上面粘贴物品后，点「解析预览」</div>';
+    return '<div class="pv"><div class="r"><span class="a">名称</span><span class="b">位置</span><span class="c">类目 / 状态</span></div>' +
+      items.map(function (it) {
+        return '<div class="r"><span class="a">' + esc(it.name) + '</span><span class="b">' + esc(it.place) + '</span>' +
+          '<span class="c">' + esc(it.cat) + ' · ' + esc(C.STATUS_META[it.status].label) + '</span></div>';
+      }).join('') + '</div>';
+  }
+
+  var AGE_OPTS = [
+    { v: 'unknown', l: '不清楚 / 刚买的' }, { v: '180', l: '约半年没用' },
+    { v: '365', l: '约 1 年没用' }, { v: '730', l: '约 2 年没用' },
+    { v: 'sealed', l: '未拆封' }, { v: 'using', l: '正在用' }
+  ];
+
+  function renderAdd() {
+    var h = header('批量录入', '一次只清一个柜子，一行一件');
+    h += '<div class="wrap">';
+    h += '<div class="card">' +
+      '<div class="field"><label class="fl" for="defPlace">本次清点位置</label>' +
+      '<input class="inp" id="defPlace" placeholder="如：卫生间镜柜" value="' + esc(ui.defPlace) + '"></div>' +
+      '<div class="field"><label class="fl" for="defAge">这批东西大概多久没用了</label>' +
+      '<select class="inp" id="defAge">' + AGE_OPTS.map(function (o) {
+        return '<option value="' + o.v + '"' + (ui.defAge === o.v ? ' selected' : '') + '>' + o.l + '</option>';
+      }).join('') + '</select></div>' +
+      '<div class="field"><label class="fl" for="draft">一行一件，直接粘贴备忘录清单</label>' +
+      '<textarea class="inp" id="draft" placeholder="兰蔻面霜&#10;安耐晒防晒霜 ¥220&#10;空气炸锅 @厨房吊柜 #电器 ~2年">' + esc(ui.draft) + '</textarea>' +
+      '<p class="hint">可选标记：<code>@位置</code> <code>#类目</code> <code>¥原价</code> <code>~1年</code>。' +
+      '什么都不写也行，会自动猜类目、用上面选好的位置和闲置时长。</p></div>' +
+      '<div class="btn-row"><button class="btn" data-act="parse">解析预览</button>' +
+      '<button class="btn pri" data-act="quick-add">直接入库</button></div>' +
+      '<div id="preview">' + previewHTML(ui.preview) + '</div>';
+    if (ui.preview && ui.preview.length) {
+      h += '<div id="confirm-wrap" style="margin-top:12px"><button class="btn pri full" data-act="confirm-add">确认入库这 ' + ui.preview.length + ' 件</button></div>';
+    }
+    h += '</div>';
+
+    h += '<div class="sec-t"><h2>清点位置</h2><span class="more">清完一个勾一个</span></div><div class="card">';
+    if (!S.places.length) h += '<div class="empty">还没有位置，先加一个开始清点。</div>';
+    S.places.forEach(function (p) {
+      var cnt = S.items.filter(function (x) { return x.place === p.name; }).length;
+      h += '<div class="place-row"><button class="chk' + (p.done ? ' on' : '') + '" data-act="toggle-place" data-id="' + esc(p.id) + '" aria-label="完成"></button>' +
+        '<span class="pnm"' + (p.done ? ' style="color:var(--muted)"' : '') + '>' + esc(p.name) + '</span>' +
+        '<span class="cnt">' + cnt + ' 件</span>' +
+        '<button class="btn sm" data-act="use-place" data-name="' + esc(p.name) + '">录入</button>' +
+        '<button class="btn sm" data-act="del-place" data-id="' + esc(p.id) + '">删</button></div>';
+    });
+    h += '<div style="display:flex;gap:8px;margin-top:12px"><input class="inp" id="newPlace" placeholder="新位置，如 阳台储物柜" value="' + esc(ui.newPlace) + '" style="flex:1">' +
+      '<button class="btn" data-act="add-place" style="flex:0 0 auto">添加</button></div></div>';
+
+    h += '<div class="card"><div style="font-size:13px;font-weight:600;margin-bottom:6px">建议的清点顺序</div>' +
+      '<p class="hint">先清损失最快的：护肤品（会过期）→ 小家电 / 数码（越放越不值钱）→ 衣物包袋 → 书籍杂物。' +
+      '同一批物品用同一个位置名，之后才能按位置找黑洞。</p></div>';
+    h += '</div>';
+    return h;
+  }
+
+  function renderData() {
+    var st = stats();
+    var h = header('数据与备份', '数据只在这台设备上，导出即备份');
+    h += '<div class="wrap">';
+    h += '<div class="card"><div style="font-size:14px;font-weight:600;margin-bottom:8px">总览</div>' +
+      '<div class="kv"><span>物品总数</span><span>' + st.total + ' 件</span></div>' +
+      '<div class="kv"><span>在用 / 闲置</span><span>' + st.using + ' / ' + st.idle + ' 件</span></div>' +
+      '<div class="kv"><span>闲置率</span><span>' + st.idleRate + '%</span></div>' +
+      '<div class="kv"><span>沉淀原价</span><span>' + money(st.sunk) + '</span></div>' +
+      '<div class="kv"><span>待决策 / 待卖</span><span>' + st.pending + ' / ' + st.toSell + ' 件</span></div>' +
+      '<div class="kv"><span>预计回款</span><span>' + money(st.sellSum) + '</span></div>' +
+      '<div class="kv"><span>已回款</span><span>' + money(st.sold) + '</span></div>' +
+      '<div class="kv"><span>本月已用起</span><span>' + st.usedUp + ' 件</span></div></div>';
+
+    h += '<div class="sec-t"><h2>按位置 · 哪个柜子是黑洞</h2></div><div class="card">';
+    if (!st.places.length) h += '<div class="empty">还没有物品</div>';
+    st.places.slice(0, 10).forEach(function (p) {
+      h += '<div class="kv"><span>' + esc(p.name) + '</span><span>' + p.total + ' 件 · 闲置 ' + p.idle + '</span></div>';
+    });
+    h += '</div>';
+
+    h += '<div class="sec-t"><h2>备份与导出</h2></div><div class="card">' +
+      '<p class="hint" style="margin:0 0 12px">上次备份：' + (S.settings.lastBackupAt || '从未') +
+      ' · 之后新增 ' + S.settings.addSinceBackup + ' 件。手机清理浏览器数据会丢失记录，请定期导出。</p>' +
+      '<div class="btn-row"><button class="btn pri" data-act="export-json">导出 JSON 备份</button>' +
+      '<button class="btn" data-act="export-csv">导出 CSV</button></div>' +
+      '<div style="margin-top:8px"><label class="btn full" for="importFile" style="display:flex">导入 JSON（按 id 合并）</label>' +
+      '<input type="file" id="importFile" accept="application/json,.json" hidden></div></div>';
+
+    h += '<div class="sec-t"><h2>重新开始</h2></div><div class="card">' +
+      '<div class="btn-row"><button class="btn" data-act="clear-demo">清空示例数据</button>' +
+      '<button class="btn dan" data-act="clear-all">清空全部数据</button></div>' +
+      '<p class="hint">清空不可撤销，请先导出备份。</p></div>';
+
+    h += '<div class="sec-t"><h2>规则说明</h2></div><div class="card">' +
+      '<p class="hint" style="margin:0">· 已过开封保质期 → 丢弃，绝不进「用起来」清单<br>' +
+      '· 距开封保质期 ≤ 90 天 → 优先用完<br>' +
+      '· 电器 / 数码闲置 ≥ 1 年 → 建议卖掉（折旧快）<br>' +
+      '· 未拆封且同类 ≥ 3 件 → 重复囤货，建议转卖<br>' +
+      '· 未拆封或闲置 ≥ 半年 → 用起来<br>' +
+      '· 工具 / 药品 / 清洁等低频刚需 → 合理保留，不误判<br>' +
+      '· 建议价按原价折算：未拆封 6 折、已开封 2 折、电器数码按年限折旧</p></div>';
+
+    h += '<div class="footnote">iOS：Safari 分享 → 添加到主屏幕，即可全屏离线使用</div></div>';
+    return h;
+  }
+
+  function renderTabbar() {
+    return TABS.map(function (t) {
+      return '<button class="tab' + (curTab === t ? ' on' : '') + '" data-act="tab" data-tab="' + t + '">' +
+        ICONS[t] + '<span>' + TAB_LABEL[t] + '</span></button>';
+    }).join('');
+  }
+
+  function renderAll() {
+    var app = $('#app');
+    if (curTab === 'list') app.innerHTML = renderList();
+    else if (curTab === 'add') app.innerHTML = renderAdd();
+    else if (curTab === 'data') app.innerHTML = renderData();
+    else app.innerHTML = renderToday();
+    $('#tabbar').innerHTML = renderTabbar();
+    if (ui.focusQ) {
+      ui.focusQ = false;
+      var q = $('#q');
+      if (q) { q.focus(); try { q.setSelectionRange(q.value.length, q.value.length); } catch (e) { } }
+    }
+  }
+
+  function go(tab) {
+    if (TABS.indexOf(tab) < 0) tab = 'today';
+    curTab = tab;
+    try { history.replaceState(null, '', '#' + tab); } catch (e) { }
+    renderAll();
+    window.scrollTo(0, 0);
+  }
+
+  function openEdit(id) {
+    var it = find(id);
+    if (!it) return;
+    ui.editId = id;
+    var sg = suggest(it), am = C.ACTION_META[sg.action];
+    var left = paoLeft(it);
+    var leftTxt = left === null ? '' : (left < 0 ? ' · 已过期 ' + (-left) + ' 天' : ' · 还剩 ' + left + ' 天');
+    var h = '<div class="sheet">';
+    h += '<h3>' + esc(it.name) + '</h3><p class="sub">' + esc(it.cat) + ' · ' + esc(it.place || '未标注') + ' · 闲置 ' + idleDays(it) + ' 天' + esc(leftTxt) + '</p>';
+    h += '<div class="sug">规则建议：<b>' + am.label + '</b> · ' + esc(sg.reason) +
+      (sg.price ? ' · 建议价 ' + money(sg.price) : '') + '<div style="margin-top:8px"><button class="btn sm" data-act="adopt" data-id="' + esc(it.id) + '">采纳建议</button></div></div>';
+    h += '<div class="field"><label class="fl" for="e_name">名称</label><input class="inp" id="e_name" value="' + esc(it.name) + '"></div>';
+    h += '<div style="display:flex;gap:10px"><div class="field" style="flex:1"><label class="fl" for="e_place">位置</label><input class="inp" id="e_place" value="' + esc(it.place) + '"></div>' +
+      '<div class="field" style="flex:1"><label class="fl" for="e_cat">类目</label><select class="inp" id="e_cat">' +
+      C.CATS.map(function (c) { return '<option' + (it.cat === c ? ' selected' : '') + '>' + c + '</option>'; }).join('') + '</select></div></div>';
+    h += '<div style="display:flex;gap:10px"><div class="field" style="flex:1"><label class="fl" for="e_status">状态</label><select class="inp" id="e_status">' +
+      Object.keys(C.STATUS_META).map(function (k) { return '<option value="' + k + '"' + (it.status === k ? ' selected' : '') + '>' + C.STATUS_META[k].label + '</option>'; }).join('') + '</select></div>' +
+      '<div class="field" style="flex:1"><label class="fl" for="e_price">原价 ¥</label><input class="inp" id="e_price" type="number" inputmode="decimal" value="' + (Number(it.price) || '') + '"></div></div>';
+    h += '<div style="display:flex;gap:10px"><div class="field" style="flex:1"><label class="fl" for="e_last">最后使用日</label><input class="inp" id="e_last" type="date" value="' + esc(it.lastUsedAt) + '"></div>' +
+      '<div class="field" style="flex:1"><label class="fl" for="e_bought">购入日</label><input class="inp" id="e_bought" type="date" value="' + esc(it.boughtAt) + '"></div></div>';
+    h += '<div style="display:flex;gap:10px"><div class="field" style="flex:1"><label class="fl" for="e_opened">开封日（护肤品）</label><input class="inp" id="e_opened" type="date" value="' + esc(it.openedAt) + '"></div>' +
+      '<div class="field" style="flex:1"><label class="fl" for="e_pao">开封保质期 · 月</label><input class="inp" id="e_pao" type="number" inputmode="numeric" value="' + (Number(it.pao) || '') + '" placeholder="如 12"></div></div>';
+    h += '<div class="field"><label class="fl" for="e_action">处理动作</label><select class="inp" id="e_action">' +
+      '<option value="">待决策</option>' +
+      Object.keys(C.ACTION_META).map(function (k) { return '<option value="' + k + '"' + (it.action === k ? ' selected' : '') + '>' + C.ACTION_META[k].label + '</option>'; }).join('') + '</select></div>';
+    h += '<div style="display:flex;gap:10px"><div class="field" style="flex:1"><label class="fl" for="e_sold">实际成交价 ¥</label><input class="inp" id="e_sold" type="number" inputmode="decimal" value="' + (Number(it.soldPrice) || '') + '"></div>' +
+      '<div class="field" style="flex:1"><label class="fl" for="e_note">备注</label><input class="inp" id="e_note" value="' + esc(it.note) + '"></div></div>';
+    h += '<div class="btn-row" style="margin-top:6px"><button class="btn pri" data-act="save-edit">保存</button>' +
+      '<button class="btn" data-act="toggle-done" data-id="' + esc(it.id) + '">' + (it.done ? '恢复未完成' : '标记完成') + '</button></div>';
+    h += '<div class="btn-row" style="margin-top:8px"><button class="btn" data-act="close-modal">关闭</button>' +
+      '<button class="btn dan" data-act="del-item" data-id="' + esc(it.id) + '">删除这件</button></div>';
+    h += '</div>';
+    var m = $('#modal');
+    m.innerHTML = h;
+    m.hidden = false;
+  }
+
+  function closeModal() { $('#modal').hidden = true; $('#modal').innerHTML = ''; ui.editId = null; }
+
+  function saveEdit() {
+    var it = find(ui.editId);
+    if (!it) return;
+    var oldAction = it.action;
+    it.name = $('#e_name').value.trim() || it.name;
+    it.place = $('#e_place').value.trim() || '未标注位置';
+    it.cat = $('#e_cat').value;
+    it.status = $('#e_status').value;
+    it.price = Number($('#e_price').value) || 0;
+    it.lastUsedAt = $('#e_last').value;
+    it.boughtAt = $('#e_bought').value;
+    it.openedAt = $('#e_opened').value;
+    it.pao = Number($('#e_pao').value) || 0;
+    it.action = $('#e_action').value;
+    it.soldPrice = Number($('#e_sold').value) || 0;
+    it.note = $('#e_note').value.trim();
+    if (it.action !== oldAction) { it.reason = ''; it.suggestPrice = 0; }
+    if (it.action === 'sell' && !it.suggestPrice) it.suggestPrice = resalePrice(it);
+    save(); closeModal(); renderAll(); toast('已保存');
+  }
+
+  function toggleDone(id) {
+    var it = find(id);
+    if (!it) return;
+    if (!it.done) {
+      it.done = 1; it.doneAt = today();
+      if (it.action === 'sell' && !Number(it.soldPrice)) {
+        it.soldPrice = Number(it.suggestPrice) || 0;
+        toast('已完成，按建议价记入回款 ' + money(it.soldPrice) + '，可在编辑里改成实际成交价');
+      } else toast('已完成，归档了');
+    } else { it.done = 0; it.doneAt = ''; toast('已恢复'); }
+    save(); renderAll();
+  }
+
+  function doApplyAll() {
+    var n = 0;
+    S.items.forEach(function (it) { if (!it.done && !it.action) { applySuggest(it); n++; } });
+    save(); renderAll();
+    toast(n ? '已为 ' + n + ' 件生成处置建议' : '没有待决策的物品');
+  }
+
+  function commitBulk(items, mode) {
+    if (!items.length) { toast('先粘贴几行物品'); return; }
+    items.forEach(function (it) { S.items.push(it); });
+    S.settings.addSinceBackup += items.length;
+    if (S.demo) { S.items = S.items.filter(function (x) { return String(x.id).indexOf('demo-') !== 0; }); S.demo = 0; }
+    save();
+    ui.draft = ''; ui.preview = null;
+    renderAll();
+    toast('已入库 ' + items.length + ' 件' + (S.settings.addSinceBackup === items.length ? '，示例数据已自动清空' : ''));
+  }
+
+  function download(name, content, type) {
+    var blob = new Blob([content], { type: type || 'text/plain;charset=utf-8' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); document.body.removeChild(a); }, 500);
+  }
+
+  function exportJSON() {
+    download('物尽其用-备份-' + today() + '.json', JSON.stringify(S, null, 2), 'application/json;charset=utf-8');
+    S.settings.addSinceBackup = 0;
+    S.settings.lastBackupAt = today();
+    save(); renderAll(); toast('已导出备份');
+  }
+
+  function csvCell(v) { return '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"'; }
+
+  function exportCSV() {
+    var cols = ['名称', '位置', '类目', '状态', '原价', '最后使用日', '购入日', '开封日', '保质期月', '处理动作', '建议价', '实际成交价', '已完成', '完成日', '备注'];
+    var rows = [cols.map(csvCell).join(',')];
+    S.items.forEach(function (it) {
+      rows.push([
+        it.name, it.place, it.cat, (C.STATUS_META[it.status] || {}).label || '', it.price,
+        it.lastUsedAt, it.boughtAt, it.openedAt, it.pao,
+        (C.ACTION_META[it.action] || {}).label || '待决策', it.suggestPrice, it.soldPrice,
+        it.done ? '是' : '否', it.doneAt, it.note
+      ].map(csvCell).join(','));
+    });
+    download('物尽其用-清单-' + today() + '.csv', '\ufeff' + rows.join('\r\n'), 'text/csv;charset=utf-8');
+    toast('已导出 CSV');
+  }
+
+  function importJSON(file) {
+    var fr = new FileReader();
+    fr.onload = function () {
+      try {
+        var o = JSON.parse(fr.result);
+        if (!o || !Array.isArray(o.items)) throw new Error('bad');
+        var ids = {};
+        S.items.forEach(function (x) { ids[x.id] = 1; });
+        var n = 0;
+        o.items.forEach(function (x) {
+          if (!x || !x.id || ids[x.id]) return;
+          ids[x.id] = 1; S.items.push(x); n++;
+        });
+        if (o.places && Array.isArray(o.places)) {
+          var pn = {};
+          S.places.forEach(function (p) { pn[p.name] = 1; });
+          o.places.forEach(function (p) { if (p && p.name && !pn[p.name]) { S.places.push(p); pn[p.name] = 1; } });
+        }
+        ensureShape(); save(); renderAll();
+        toast('已合并 ' + n + ' 件');
+      } catch (e) { toast('文件读不出来，请选择本工具导出的 JSON'); }
+    };
+    fr.readAsText(file);
+  }
+
+  function onAction(act, el, e) {
+    var id = el.getAttribute('data-id');
+    switch (act) {
+      case 'tab': case 'goto': go(el.getAttribute('data-tab')); break;
+      case 'filter': ui.filter = el.getAttribute('data-v'); renderAll(); break;
+      case 'group': ui.group = el.getAttribute('data-v'); renderAll(); break;
+      case 'sort': ui.sort = el.getAttribute('data-v'); renderAll(); break;
+      case 'apply-all': doApplyAll(); break;
+      case 'today-done': toggleDone(id); break;
+      case 'toggle-done': toggleDone(id); if (ui.editId && !$('#modal').hidden) closeModal(); break;
+      case 'edit': openEdit(id); break;
+      case 'close-modal': closeModal(); break;
+      case 'adopt': {
+        var a = find(id); if (a) { applySuggest(a); save(); closeModal(); renderAll(); toast('已采纳建议'); }
+        break;
+      }
+      case 'save-edit': saveEdit(); break;
+      case 'del-item': {
+        var d = find(id);
+        if (d && confirm('确定删除「' + d.name + '」？此操作不可撤销。')) {
+          S.items = S.items.filter(function (x) { return x.id !== id; });
+          save(); closeModal(); renderAll(); toast('已删除');
+        }
+        break;
+      }
+      case 'clear-demo': {
+        if (!confirm('清空示例数据，开始记录自己家的物品？')) break;
+        S.items = S.items.filter(function (x) { return String(x.id).indexOf('demo-') !== 0; });
+        S.demo = 0; save(); renderAll(); toast('已清空示例，去「录入」开始吧'); break;
+      }
+      case 'clear-all': {
+        if (!confirm('将清空全部 ' + S.items.length + ' 件物品和位置，确定吗？建议先导出备份。')) break;
+        if (!confirm('再确认一次：清空后无法恢复。')) break;
+        S = blankState(); save(); ui.q = ''; ui.draft = ''; ui.preview = null; renderAll(); toast('已清空'); break;
+      }
+      case 'parse': {
+        ui.draft = ($('#draft') || {}).value || '';
+        ui.defPlace = ($('#defPlace') || {}).value || '';
+        ui.defAge = ($('#defAge') || {}).value || '365';
+        ui.preview = parseBulk(ui.draft, ui.defPlace);
+        var pv = $('#preview');
+        if (pv) pv.innerHTML = previewHTML(ui.preview);
+        renderConfirm();
+        toast('解析出 ' + ui.preview.length + ' 件，确认无误再入库');
+        break;
+      }
+      case 'confirm-add': commitBulk(ui.preview || [], 'confirm'); break;
+      case 'quick-add': {
+        var txt = ($('#draft') || {}).value || ui.draft;
+        var pl = ($('#defPlace') || {}).value || ui.defPlace;
+        var ag = ($('#defAge') || {}).value || ui.defAge;
+        ui.defAge = ag;
+        commitBulk(parseBulk(txt, pl), 'quick');
+        break;
+      }
+      case 'add-place': {
+        var v = (($('#newPlace') || {}).value || '').trim();
+        if (!v) { toast('先填位置名'); break; }
+        if (S.places.some(function (p) { return p.name === v; })) { toast('这个位置已经有了'); break; }
+        S.places.push({ id: uid(), name: v, done: 0 });
+        ui.newPlace = ''; ui.defPlace = v; save(); renderAll(); toast('已添加位置：' + v); break;
+      }
+      case 'use-place': ui.defPlace = el.getAttribute('data-name'); save(); renderAll(); toast('已设为本次清点位置'); break;
+      case 'toggle-place': {
+        var p = S.places.filter(function (x) { return x.id === id; })[0];
+        if (p) { p.done = p.done ? 0 : 1; save(); renderAll(); }
+        break;
+      }
+      case 'del-place': {
+        S.places = S.places.filter(function (x) { return x.id !== id; });
+        save(); renderAll(); toast('已删除位置（物品保留）'); break;
+      }
+      case 'export-json': exportJSON(); break;
+      case 'export-csv': exportCSV(); break;
+    }
+  }
+
+  function renderConfirm() {
+    var old = $('#confirm-wrap');
+    if (old) old.remove();
+    if (!ui.preview || !ui.preview.length) return;
+    var wrap = document.createElement('div');
+    wrap.id = 'confirm-wrap';
+    wrap.style.marginTop = '12px';
+    wrap.innerHTML = '<button class="btn pri full" data-act="confirm-add">确认入库这 ' + ui.preview.length + ' 件</button>';
+    var pv = $('#preview');
+    if (pv && pv.parentNode) pv.parentNode.insertBefore(wrap, pv.nextSibling);
+  }
+
+  document.addEventListener('click', function (e) {
+    if (e.target.id === 'modal') { closeModal(); return; }
+    var el = e.target.closest ? e.target.closest('[data-act]') : null;
+    if (!el) return;
+    e.preventDefault();
+    onAction(el.getAttribute('data-act'), el, e);
+  });
+
+  document.addEventListener('input', function (e) {
+    var t = e.target;
+    if (t.id === 'draft') ui.draft = t.value;
+    else if (t.id === 'defPlace') ui.defPlace = t.value;
+    else if (t.id === 'newPlace') ui.newPlace = t.value;
+    else if (t.id === 'q') {
+      ui.q = t.value;
+      var lb = $('#listBody');
+      if (lb) lb.innerHTML = listBodyHTML();
+    }
+  });
+
+  document.addEventListener('change', function (e) {
+    var t = e.target;
+    if (t.id === 'defAge') ui.defAge = t.value;
+    else if (t.id === 'importFile' && t.files && t.files[0]) {
+      importJSON(t.files[0]);
+      t.value = '';
+    }
+  });
+
+  window.addEventListener('hashchange', function () {
+    var h = (location.hash || '').replace('#', '');
+    if (TABS.indexOf(h) >= 0 && h !== curTab) { curTab = h; renderAll(); }
+  });
+
+  var initial = (location.hash || '').replace('#', '');
+  curTab = TABS.indexOf(initial) >= 0 ? initial : 'today';
+  load();
+  renderAll();
+})();
+</script>
+</body>
+</html>
