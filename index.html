@@ -580,7 +580,7 @@ window.CFG = (function () {
     h += '<div class="sec-t"><h2>清点进度</h2><span class="more">一次只清一个柜子</span></div><div class="card">' +
       '<div style="display:flex;justify-content:space-between;font-size:14px"><span>已清点位置</span><span>' + st.placesDone + ' / ' + st.placesTotal + '</span></div>' +
       '<div class="prog"><i style="width:' + pct(st.placesDone, st.placesTotal) + '%"></i></div>' +
-      '<p class="hint">按位置分批录入，不要一次面对全部 ' + st.total + ' 件。</p>' +
+      '<p class="hint">' + (st.total ? '按位置分批录入，不要一次面对全部 ' + st.total + ' 件。' : '先添加一个清点位置，再开始录入。') + '</p>' +
       '<div style="margin-top:12px"><button class="btn full" data-act="goto" data-tab="add">继续清点下一个位置</button></div></div>';
 
     h += '<div class="card"><div class="kv"><span>待卖</span><span>' + st.toSell + ' 件</span></div>' +
