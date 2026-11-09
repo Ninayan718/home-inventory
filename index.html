@@ -135,6 +135,20 @@ textarea.inp{min-height:150px;resize:vertical;line-height:1.7;font-size:14px}
 .footnote{text-align:center;font-size:11px;color:var(--muted);padding:8px 0 4px;line-height:1.7}
 .sug{background:var(--soft);border-radius:10px;padding:10px 12px;font-size:13px;margin-bottom:12px}
 .sug b{font-weight:600}
+.seg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;background:var(--soft);padding:4px;border-radius:10px;margin-bottom:14px}
+.seg button{border:1px solid transparent;background:transparent;border-radius:8px;min-height:36px;font-size:13px;color:var(--muted);padding:5px 2px}
+.seg button.on{background:#fff;border-color:var(--line);color:var(--ink);font-weight:500}
+.grp-t2{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--muted);margin:14px 2px 6px}
+.pick-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--line);font-size:14px;min-height:42px}
+.pick-row:first-child{border-top:0}
+.pick-row input{width:18px;height:18px;flex:0 0 18px;accent-color:var(--accent);margin:0}
+.pick-row .pn{flex:1;min-width:0}
+.pick-row .pm{font-size:12px;color:var(--muted);flex:0 0 auto}
+.photo-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:12px}
+.photo-cell{position:relative;border-radius:10px;overflow:hidden;border:1px solid var(--line);background:var(--soft)}
+.photo-cell img{display:block;width:100%;height:104px;object-fit:cover}
+.photo-cell .btn{position:absolute;right:4px;bottom:4px;min-height:24px;padding:2px 8px;font-size:11px;background:rgba(255,255,255,.94)}
+.banner.green{background:var(--green-soft);border-color:#CBE4D4;color:#1F5A40}
 </style>
 </head>
 <body>
@@ -142,6 +156,18 @@ textarea.inp{min-height:150px;resize:vertical;line-height:1.7;font-size:14px}
 <nav id="tabbar" class="tabbar"></nav>
 <div id="modal" class="modal" hidden></div>
 <div id="toast" class="toast" hidden></div>
+<script>/* 照片识别结果回写通道
+   在对话里把照片发给 WorkBuddy 识别后，我会把物品加进 items 并提升 version，
+   重新发布。你刷新网页时工具会自动合并新物品，不会覆盖本地已有数据。
+   item 字段（除 name 外都可省略）：
+     { id, name, place, cat, price, status, lastUsedAt, openedAt, pao, note }
+   id 省略时按 version + 序号自动生成；同名物品不会被重复合并。 */
+window.SEED = {
+  version: '0',
+  note: '',
+  items: []
+};
+</script>
 <script>/* 物尽其用 · 静态配置与示例数据 */
 window.CFG = (function () {
   'use strict';
@@ -273,6 +299,137 @@ window.CFG = (function () {
     });
   }
 
+  /* 内置常见物品库：[名称, 位置, 类目, 参考原价, 是否家家常见, 使用频率]
+     使用频率 0=几乎天天用 / 1=偶尔用 / 2=常年吃灰。
+     目的：把「回忆家里有什么」变成「把没有的删掉」。 */
+  var BASE_ROWS = [
+    ['洁面乳', '卫生间镜柜', '护肤', 89, 1, 0],
+    ['爽肤水', '卫生间镜柜', '护肤', 159, 1, 0],
+    ['精华液', '卫生间镜柜', '护肤', 499, 1, 1],
+    ['面霜', '卫生间镜柜', '护肤', 399, 1, 0],
+    ['眼霜', '卫生间镜柜', '护肤', 299, 0, 1],
+    ['防晒霜', '卫生间镜柜', '护肤', 189, 1, 1],
+    ['面膜', '卫生间镜柜', '护肤', 99, 1, 2],
+    ['卸妆水', '卫生间镜柜', '护肤', 89, 1, 1],
+    ['乳液', '卫生间镜柜', '护肤', 169, 0, 1],
+    ['润唇膏', '卫生间镜柜', '护肤', 39, 1, 1],
+    ['粉底液', '卫生间镜柜', '彩妆', 299, 0, 1],
+    ['口红', '卫生间镜柜', '彩妆', 219, 1, 2],
+    ['睫毛膏', '卫生间镜柜', '彩妆', 129, 0, 2],
+    ['散粉', '卫生间镜柜', '彩妆', 189, 0, 2],
+    ['眉笔', '卫生间镜柜', '彩妆', 59, 0, 1],
+    ['香水', '卫生间镜柜', '个护', 599, 0, 2],
+    ['美容仪', '卫生间镜柜', '电器', 1299, 0, 2],
+    ['电动牙刷', '卫生间镜柜', '电器', 299, 1, 0],
+    ['洗发水', '洗手台下', '个护', 69, 1, 0],
+    ['护发素', '洗手台下', '个护', 69, 0, 1],
+    ['沐浴露', '洗手台下', '个护', 59, 1, 0],
+    ['牙膏', '洗手台下', '个护', 25, 1, 0],
+    ['备用牙刷', '洗手台下', '个护', 19, 1, 2],
+    ['吹风机', '洗手台下', '电器', 299, 1, 0],
+    ['卷发棒', '洗手台下', '电器', 199, 0, 2],
+    ['剃须刀', '洗手台下', '电器', 299, 0, 1],
+    ['洗衣液', '洗手台下', '清洁', 49, 1, 0],
+    ['备用毛巾', '洗手台下', '其他', 39, 1, 1],
+    ['空气炸锅', '厨房吊柜', '电器', 399, 1, 2],
+    ['电饭煲', '厨房吊柜', '电器', 299, 1, 0],
+    ['破壁机', '厨房吊柜', '电器', 599, 0, 2],
+    ['微波炉', '厨房吊柜', '电器', 499, 1, 0],
+    ['电烤箱', '厨房吊柜', '电器', 699, 0, 2],
+    ['榨汁机', '厨房吊柜', '电器', 259, 0, 2],
+    ['咖啡机', '厨房吊柜', '电器', 899, 0, 2],
+    ['电水壶', '厨房吊柜', '电器', 129, 1, 0],
+    ['电磁炉', '厨房吊柜', '电器', 199, 0, 2],
+    ['豆浆机', '厨房吊柜', '电器', 399, 0, 2],
+    ['保鲜盒', '厨房吊柜', '厨房', 39, 1, 1],
+    ['保温杯', '厨房吊柜', '厨房', 129, 1, 1],
+    ['备用餐具', '厨房吊柜', '厨房', 99, 0, 2],
+    ['茶具', '厨房吊柜', '厨房', 199, 0, 2],
+    ['炒锅', '厨房吊柜', '厨房', 199, 1, 0],
+    ['充电宝', '卧室抽屉', '数码', 129, 1, 1],
+    ['数据线', '卧室抽屉', '数码', 29, 1, 1],
+    ['备用充电器', '卧室抽屉', '数码', 59, 1, 2],
+    ['耳机', '卧室抽屉', '数码', 299, 1, 0],
+    ['旧手机', '卧室抽屉', '数码', 1999, 1, 2],
+    ['智能手表', '卧室抽屉', '数码', 1299, 0, 2],
+    ['备用眼镜', '卧室抽屉', '其他', 399, 0, 2],
+    ['袜子', '卧室抽屉', '衣物', 29, 1, 0],
+    ['围巾', '卧室抽屉', '衣物', 129, 0, 2],
+    ['护手霜', '卧室抽屉', '护肤', 39, 1, 1],
+    ['身体乳', '卧室抽屉', '护肤', 89, 1, 1],
+    ['笔记本', '书房抽屉', '书籍', 29, 1, 1],
+    ['平装书', '书房抽屉', '书籍', 49, 1, 1],
+    ['平板电脑', '书房抽屉', '数码', 2199, 0, 2],
+    ['键盘', '书房抽屉', '数码', 199, 0, 1],
+    ['鼠标', '书房抽屉', '数码', 99, 0, 1],
+    ['移动硬盘', '书房抽屉', '数码', 399, 0, 2],
+    ['U盘', '书房抽屉', '数码', 59, 0, 2],
+    ['插线板', '书房抽屉', '工具', 59, 1, 1],
+    ['剪刀', '书房抽屉', '工具', 19, 1, 1],
+    ['胶带', '书房抽屉', '工具', 9, 1, 1],
+    ['备用电池', '书房抽屉', '工具', 29, 1, 2],
+    ['雨伞', '玄关', '其他', 69, 1, 1],
+    ['钥匙扣', '玄关', '其他', 19, 0, 1],
+    ['鞋油', '玄关', '清洁', 29, 0, 2],
+    ['备用购物袋', '玄关', '其他', 9, 1, 1],
+    ['口罩', '玄关', '药品', 29, 1, 1],
+    ['行李箱', '储物间', '其他', 399, 1, 2],
+    ['工具箱', '储物间', '工具', 129, 1, 2],
+    ['螺丝刀', '储物间', '工具', 39, 1, 2],
+    ['备用灯泡', '储物间', '工具', 19, 1, 2],
+    ['备用纸巾', '储物间', '清洁', 29, 1, 1],
+    ['垃圾袋', '储物间', '清洁', 19, 1, 1],
+    ['消毒液', '储物间', '清洁', 39, 1, 1],
+    ['拖把', '储物间', '清洁', 79, 1, 1],
+    ['扫把', '储物间', '清洁', 39, 1, 1],
+    ['收纳箱', '储物间', '其他', 59, 1, 1],
+    ['闲置小家电', '储物间', '电器', 199, 0, 2],
+    ['创可贴', '药箱', '药品', 15, 1, 2],
+    ['退烧药', '药箱', '药品', 29, 1, 2],
+    ['感冒药', '药箱', '药品', 29, 1, 2],
+    ['维生素', '药箱', '药品', 89, 1, 1],
+    ['体温计', '药箱', '药品', 39, 1, 2],
+    ['碘伏棉签', '药箱', '药品', 19, 0, 2],
+    ['钙片', '药箱', '药品', 79, 0, 1],
+    ['晾衣架', '阳台', '清洁', 49, 1, 1],
+    ['洗衣盆', '阳台', '清洁', 39, 0, 2],
+    ['园艺剪', '阳台', '工具', 39, 0, 2],
+    ['备用花盆', '阳台', '其他', 29, 0, 2],
+    ['折叠椅', '阳台', '其他', 129, 0, 2]
+  ].map(function (r, i) {
+    return { id: 'base-' + (i + 1), name: r[0], place: r[1], cat: r[2], price: r[3], common: r[4], freq: r[5] };
+  });
+
+  function basePlaces() {
+    var seen = {}, out = [];
+    BASE_ROWS.forEach(function (r) {
+      if (!seen[r.place]) { seen[r.place] = 1; out.push({ id: 'bp-' + out.length, name: r.place, done: 0 }); }
+    });
+    return out;
+  }
+
+  /* 生成可入库的物品对象。ageMode: auto / using / sealed / 数字天数 */
+  function baseItems(rows, ageMode) {
+    return rows.map(function (r) {
+      var status = 'idle', last = dayOffset(-450);
+      if (ageMode && ageMode !== 'auto') {
+        if (ageMode === 'using') { status = 'using'; last = dayOffset(0); }
+        else if (ageMode === 'sealed') { status = 'sealed'; last = ''; }
+        else { status = 'idle'; last = dayOffset(-(parseInt(ageMode, 10) || 365)); }
+      } else {
+        if (r.freq === 0) { status = 'using'; last = dayOffset(0); }
+        else if (r.freq === 1) { status = 'idle'; last = dayOffset(-200); }
+        else { status = 'idle'; last = dayOffset(-450); }
+      }
+      return {
+        id: r.id, name: r.name, place: r.place, cat: r.cat, status: status, price: r.price,
+        boughtAt: '', lastUsedAt: last, openedAt: '', pao: 0,
+        action: '', suggestPrice: 0, reason: '', done: 0, doneAt: '', soldPrice: 0,
+        note: '内置常见物品', createdAt: dayOffset(0)
+      };
+    });
+  }
+
   return {
     CATS: CATS,
     KEYWORD_PAIRS: KEYWORD_PAIRS,
@@ -281,7 +438,10 @@ window.CFG = (function () {
     LOW_FREQ_CATS: LOW_FREQ_CATS,
     DEMO_PLACES: DEMO_PLACES,
     dayOffset: dayOffset,
-    demoItems: demoItems
+    demoItems: demoItems,
+    BASE_ROWS: BASE_ROWS,
+    basePlaces: basePlaces,
+    baseItems: baseItems
   };
 })();
 </script>
@@ -297,8 +457,14 @@ window.CFG = (function () {
   var ui = {
     q: '', filter: 'all', group: 'cat', sort: 'idle',
     draft: '', defPlace: '', defAge: '365', newPlace: '',
-    preview: null, editId: null, focusQ: false
+    preview: null, editId: null, focusQ: false,
+    addMode: 'paste', pickQ: '', pickPlace: '全部', pickAge: 'auto',
+    picked: {}, aiText: '', photos: [], seedNotice: 0
   };
+
+  var AI_PROMPT = '请识别这张照片里的所有物品，每行一件，按「名称 ¥原价 @位置 ~闲置时长」输出，不要编号、不要解释。\n' +
+    '位置按物品所在的地方猜（如 卫生间镜柜 / 厨房吊柜 / 储物间），价格不确定就不写。\n' +
+    '识别完请把结果写进「物尽其用」工具的 seed 并重新发布，我刷新网页就能看到。';
 
   var ICONS = {
     today: '<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5.5 9.5V20h13V9.5"/><path d="M9.5 20v-6h5v6"/></svg>',
@@ -370,6 +536,7 @@ window.CFG = (function () {
   function blankState() {
     return {
       version: 1, items: [], places: [], demo: 0, createdAt: today(),
+      seedVersion: '', seeded: 0, baseNotice: 0, seedNotice: 0,
       settings: { addSinceBackup: 0, lastBackupAt: '' }
     };
   }
@@ -384,8 +551,9 @@ window.CFG = (function () {
     if (it.status === 'using') return { action: 'keep', reason: '正在使用，无需处理', price: 0 };
     if (left !== null && left <= 90) return { action: 'use', reason: '距开封保质期只剩 ' + left + ' 天，优先用完', price: 0 };
     if (C.LOW_FREQ_CATS.indexOf(it.cat) >= 0 && idle > 180) return { action: 'keep', reason: '低频但必要，合理保留', price: 0 };
-    if ((it.cat === '电器' || it.cat === '数码') && idle >= 365) return { action: 'sell', reason: '闲置超过 1 年，折旧快，越晚卖越不值钱', price: price };
-    if (it.status === 'sealed' && cc >= 3) return { action: 'sell', reason: '同类已有 ' + cc + ' 件，未拆封残值最高，适合转卖', price: price };
+    var tooCheap = price > 0 && price < 50;
+    if ((it.cat === '电器' || it.cat === '数码') && idle >= 365 && !tooCheap) return { action: 'sell', reason: '闲置超过 1 年，折旧快，越晚卖越不值钱', price: price };
+    if (it.status === 'sealed' && cc >= 3 && !tooCheap) return { action: 'sell', reason: '同类已有 ' + cc + ' 件，未拆封残值最高，适合转卖', price: price };
     if (it.status === 'sealed' && idle >= 180) return { action: 'use', reason: '未拆封闲置 ' + idle + ' 天，尽快拆来用', price: 0 };
     if (idle >= 180) return { action: 'use', reason: '已闲置 ' + idle + ' 天，放到显眼处用起来', price: 0 };
     return { action: 'keep', reason: '近期还在用，先留着', price: 0 };
@@ -399,29 +567,73 @@ window.CFG = (function () {
   }
 
   function load() {
+    var existing = false;
     try {
       var raw = localStorage.getItem(KEY);
       if (raw) {
         var o = JSON.parse(raw);
-        if (o && Array.isArray(o.items)) { S = o; ensureShape(); return; }
+        if (o && Array.isArray(o.items)) { S = o; ensureShape(); existing = true; }
       }
     } catch (e) { /* 隐私模式下忽略 */ }
-    S = blankState();
-    S.items = C.demoItems();
-    S.items.forEach(function (it) { it.cat = guessCat(it.name); });
-    S.places = C.DEMO_PLACES.map(function (p, i) { return { id: 'p' + (i + 1), name: p.name, done: p.done }; });
-    S.demo = 1;
-    S.items.forEach(applySuggest);
-    ['demo-1', 'demo-2', 'demo-8'].forEach(function (id) {
-      var it = find(id);
-      if (it) { it.action = ''; it.reason = ''; it.suggestPrice = 0; }
+    if (!existing) {
+      S = blankState();
+      var rows = C.BASE_ROWS.filter(function (r) { return r.common; });
+      S.items = C.baseItems(rows, 'auto');
+      S.places = C.basePlaces();
+      S.seeded = 1;
+      S.baseNotice = S.items.length;
+      S.items.forEach(applySuggest);
+      save();
+    }
+    applySeed();
+  }
+
+  function normalizeSeedItem(raw, idx, version) {
+    if (!raw) return null;
+    var name = String(raw.name || '').trim();
+    if (!name) return null;
+    return {
+      id: String(raw.id || ('seed-' + version + '-' + idx)),
+      name: name, place: raw.place || '照片识别', cat: raw.cat || guessCat(name),
+      status: raw.status || 'idle', price: Number(raw.price) || 0,
+      boughtAt: raw.boughtAt || '', lastUsedAt: raw.lastUsedAt || C.dayOffset(-365),
+      openedAt: raw.openedAt || '', pao: Number(raw.pao) || 0,
+      action: '', suggestPrice: 0, reason: '', done: 0, doneAt: '', soldPrice: 0,
+      note: raw.note || ('照片识别 · ' + ((window.SEED && window.SEED.note) || '')),
+      createdAt: C.dayOffset(0)
+    };
+  }
+
+  /* 我在对话里识别完照片后提升 SEED.version 并重新发布；
+     用户刷新网页即自动合并，按 id 去重，绝不覆盖本地已有数据。 */
+  function applySeed() {
+    var sd = window.SEED;
+    if (!sd || !sd.version || sd.version === '0' || S.seedVersion === sd.version) return;
+    var ids = {}, added = [];
+    S.items.forEach(function (x) { ids[x.id] = 1; });
+    (sd.items || []).forEach(function (raw, i) {
+      var it = normalizeSeedItem(raw, i, sd.version);
+      if (!it || ids[it.id]) return;
+      ids[it.id] = 1;
+      S.items.push(it);
+      added.push(it);
+      if (it.place && !S.places.some(function (p) { return p.name === it.place; })) {
+        S.places.push({ id: uid(), name: it.place, done: 0 });
+      }
     });
+    added.forEach(applySuggest);
+    S.seedVersion = sd.version;
+    S.seedNotice = added.length;
     save();
   }
 
   function ensureShape() {
     if (!S.places) S.places = [];
     if (!S.settings) S.settings = { addSinceBackup: 0, lastBackupAt: '' };
+    if (S.seedVersion === undefined) S.seedVersion = '';
+    if (S.seeded === undefined) S.seeded = 0;
+    if (S.baseNotice === undefined) S.baseNotice = 0;
+    if (S.seedNotice === undefined) S.seedNotice = 0;
     S.items.forEach(function (it) {
       if (!it.cat) it.cat = guessCat(it.name);
       if (it.done === undefined) it.done = 0;
@@ -469,7 +681,11 @@ window.CFG = (function () {
     });
     var cats = Object.keys(catMap).map(function (k) {
       var o = catMap[k]; o.rate = pct(o.idle, o.total); return o;
-    }).sort(function (a, b) { return b.idle - a.idle || b.rate - a.rate || b.total - a.total; });
+    }).sort(function (a, b) {
+      var la = C.LOW_FREQ_CATS.indexOf(a.name) >= 0 ? 1 : 0;
+      var lb = C.LOW_FREQ_CATS.indexOf(b.name) >= 0 ? 1 : 0;
+      return la - lb || b.idle - a.idle || b.rate - a.rate || b.total - a.total;
+    });
     var places = Object.keys(placeMap).map(function (k) { return placeMap[k]; })
       .sort(function (a, b) { return b.idle - a.idle || b.total - a.total; });
 
@@ -535,9 +751,16 @@ window.CFG = (function () {
     var h = header('家里有什么', '物尽其用 · 共 ' + st.total + ' 件 · 闲置率 ' + st.idleRate + '%');
     h += '<div class="wrap">';
 
+    if (S.seedNotice > 0) {
+      h += '<div class="banner green"><div class="row"><span>刚从照片识别补入 ' + S.seedNotice + ' 件</span>' +
+        '<button class="btn sm" data-act="dismiss-seed">知道了</button></div></div>';
+    }
     if (S.demo) {
-      h += '<div class="banner"><div class="row"><span>这是示例数据，先点一点看效果</span>' +
-        '<button class="btn sm" data-act="clear-demo">清空示例</button></div></div>';
+      h += '<div class="banner"><div class="row"><span>这还是演示数据，换成常见物品清单更省事</span>' +
+        '<button class="btn sm" data-act="replace-demo">换成基础清单</button></div></div>';
+    } else if (S.baseNotice > 0) {
+      h += '<div class="banner blue"><div class="row"><span>已放入 ' + S.baseNotice + ' 件常见物品，把家里没有的删掉就行</span>' +
+        '<button class="btn sm" data-act="dismiss-base">知道了</button></div></div>';
     }
     if (st.pending > 0) {
       h += '<div class="banner blue"><div class="row"><span>还有 ' + st.pending + ' 件没定去处</span>' +
@@ -729,10 +952,99 @@ window.CFG = (function () {
     { v: 'sealed', l: '未拆封' }, { v: 'using', l: '正在用' }
   ];
 
-  function renderAdd() {
-    var h = header('批量录入', '一次只清一个柜子，一行一件');
-    h += '<div class="wrap">';
-    h += '<div class="card">' +
+  var PICK_AGE_OPTS = [
+    { v: 'auto', l: '按常见使用频率（推荐）' }, { v: 'using', l: '全部标为在用' },
+    { v: 'sealed', l: '全部标为未拆封' }, { v: '180', l: '全部约半年没用' },
+    { v: '365', l: '全部约 1 年没用' }, { v: '730', l: '全部约 2 年没用' }
+  ];
+  var ADD_MODES = [{ v: 'paste', l: '粘贴清单' }, { v: 'pick', l: '勾选常见' }, { v: 'photo', l: '拍照识别' }];
+
+  /* 照片只存本机 IndexedDB，不上传服务器 */
+  var PHOTO_DB = 'wjy_photos_v1';
+  function openPhotoDB() {
+    return new Promise(function (res, rej) {
+      if (!window.indexedDB) { rej(new Error('IndexedDB 不可用')); return; }
+      var r = indexedDB.open(PHOTO_DB, 1);
+      r.onupgradeneeded = function () {
+        var db = r.result;
+        if (!db.objectStoreNames.contains('photos')) db.createObjectStore('photos', { keyPath: 'id' });
+      };
+      r.onsuccess = function () { res(r.result); };
+      r.onerror = function () { rej(r.error); };
+    });
+  }
+  function photoTx(mode, fn) {
+    return openPhotoDB().then(function (db) {
+      return new Promise(function (res, rej) {
+        var req = fn(db.transaction('photos', mode).objectStore('photos'));
+        req.onsuccess = function () { res(req.result); };
+        req.onerror = function () { rej(req.error); };
+      });
+    });
+  }
+  function allPhotos() { return photoTx('readonly', function (s) { return s.getAll(); }); }
+  function putPhoto(rec) { return photoTx('readwrite', function (s) { return s.put(rec); }); }
+  function delPhoto(id) { return photoTx('readwrite', function (s) { return s.delete(id); }); }
+  function clearPhotoDB() { return photoTx('readwrite', function (s) { return s.clear(); }); }
+
+  function refreshPhotos() {
+    allPhotos().then(function (ps) {
+      ui.photos = ps || [];
+      if (curTab === 'add' && ui.addMode === 'photo') renderAll();
+    }).catch(function () { });
+  }
+
+  function compressPhoto(file) {
+    return new Promise(function (res) {
+      var url = URL.createObjectURL(file), img = new Image();
+      img.onload = function () {
+        var max = 960, sc = Math.min(1, max / Math.max(img.width, img.height));
+        var c = document.createElement('canvas');
+        c.width = Math.max(1, Math.round(img.width * sc));
+        c.height = Math.max(1, Math.round(img.height * sc));
+        c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+        URL.revokeObjectURL(url);
+        res(c.toDataURL('image/jpeg', 0.7));
+      };
+      img.onerror = function () { URL.revokeObjectURL(url); res(''); };
+      img.src = url;
+    });
+  }
+
+  function handlePhotos(files) {
+    var list = Array.prototype.slice.call(files || []).slice(0, 8);
+    if (!list.length) return;
+    toast('正在压缩照片…');
+    Promise.all(list.map(compressPhoto)).then(function (datas) {
+      return Promise.all(datas.filter(Boolean).map(function (d, i) {
+        return putPhoto({ id: uid() + '-' + i, data: d, createdAt: today(), status: 'pending' });
+      }));
+    }).then(allPhotos).then(function (ps) {
+      ui.photos = ps || [];
+      if (curTab === 'add' && ui.addMode === 'photo') renderAll();
+      toast('已存好，把照片发到对话里让我识别');
+    }).catch(function () { toast('照片没存上，可以直接把照片发到对话里'); });
+  }
+
+  function copyText(txt) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(txt).then(function () { toast('已复制，去对话里粘贴'); })
+        .catch(function () { fallbackCopy(txt); });
+    } else fallbackCopy(txt);
+  }
+  function fallbackCopy(txt) {
+    var ta = document.createElement('textarea');
+    ta.value = txt;
+    ta.style.cssText = 'position:absolute;left:-9999px';
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); toast('已复制，去对话里粘贴'); }
+    catch (e) { toast('复制失败，请长按下面文字手动复制'); }
+    document.body.removeChild(ta);
+  }
+
+  function renderPaste() {
+    var h = '<div class="card">' +
       '<div class="field"><label class="fl" for="defPlace">本次清点位置</label>' +
       '<input class="inp" id="defPlace" placeholder="如：卫生间镜柜" value="' + esc(ui.defPlace) + '"></div>' +
       '<div class="field"><label class="fl" for="defAge">这批东西大概多久没用了</label>' +
@@ -750,23 +1062,115 @@ window.CFG = (function () {
       h += '<div id="confirm-wrap" style="margin-top:12px"><button class="btn pri full" data-act="confirm-add">确认入库这 ' + ui.preview.length + ' 件</button></div>';
     }
     h += '</div>';
-
-    h += '<div class="sec-t"><h2>清点位置</h2><span class="more">清完一个勾一个</span></div><div class="card">';
-    if (!S.places.length) h += '<div class="empty">还没有位置，先加一个开始清点。</div>';
-    S.places.forEach(function (p) {
-      var cnt = S.items.filter(function (x) { return x.place === p.name; }).length;
-      h += '<div class="place-row"><button class="chk' + (p.done ? ' on' : '') + '" data-act="toggle-place" data-id="' + esc(p.id) + '" aria-label="完成"></button>' +
-        '<span class="pnm"' + (p.done ? ' style="color:var(--muted)"' : '') + '>' + esc(p.name) + '</span>' +
-        '<span class="cnt">' + cnt + ' 件</span>' +
-        '<button class="btn sm" data-act="use-place" data-name="' + esc(p.name) + '">录入</button>' +
-        '<button class="btn sm" data-act="del-place" data-id="' + esc(p.id) + '">删</button></div>';
-    });
-    h += '<div style="display:flex;gap:8px;margin-top:12px"><input class="inp" id="newPlace" placeholder="新位置，如 阳台储物柜" value="' + esc(ui.newPlace) + '" style="flex:1">' +
-      '<button class="btn" data-act="add-place" style="flex:0 0 auto">添加</button></div></div>';
-
     h += '<div class="card"><div style="font-size:13px;font-weight:600;margin-bottom:6px">建议的清点顺序</div>' +
       '<p class="hint">先清损失最快的：护肤品（会过期）→ 小家电 / 数码（越放越不值钱）→ 衣物包袋 → 书籍杂物。' +
       '同一批物品用同一个位置名，之后才能按位置找黑洞。</p></div>';
+    return h;
+  }
+
+  function pickRows() {
+    var q = ui.pickQ.trim().toLowerCase();
+    return C.BASE_ROWS.filter(function (r) {
+      if (ui.pickPlace !== '全部' && r.place !== ui.pickPlace) return false;
+      if (q && (r.name + ' ' + r.cat + ' ' + r.place).toLowerCase().indexOf(q) < 0) return false;
+      return true;
+    });
+  }
+
+  function pickBodyHTML() {
+    var rows = pickRows(), groups = {}, h = '';
+    if (!rows.length) return '<div class="card"><div class="empty">没找到，换个词试试</div></div>';
+    rows.forEach(function (r) { (groups[r.place] = groups[r.place] || []).push(r); });
+    Object.keys(groups).forEach(function (p) {
+      h += '<div class="grp-t2"><span>' + esc(p) + ' · ' + groups[p].length + ' 件</span>' +
+        '<button class="btn sm" data-act="pick-group" data-place="' + esc(p) + '">全选这组</button></div>';
+      h += '<div class="card">' + groups[p].map(function (r) {
+        return '<label class="pick-row"><input type="checkbox" data-pick="' + esc(r.id) + '"' + (ui.picked[r.id] ? ' checked' : '') + '>' +
+          '<span class="pn">' + esc(r.name) + '</span><span class="pm">' + esc(r.cat) + ' · ' + money(r.price) + '</span></label>';
+      }).join('') + '</div>';
+    });
+    return h;
+  }
+
+  function pickedCount() {
+    return Object.keys(ui.picked).filter(function (k) { return ui.picked[k]; }).length;
+  }
+
+  function renderPick() {
+    var common = C.BASE_ROWS.filter(function (r) { return r.common; });
+    var h = '<div class="card">' +
+      '<div style="font-size:14px;font-weight:600;margin-bottom:6px">不想打字？直接勾</div>' +
+      '<p class="hint" style="margin:0 0 12px">内置了 ' + C.BASE_ROWS.length + ' 件家里常见的东西。' +
+      '把有的勾上，或者一键把 ' + common.length + ' 件最常见的全塞进来，再去清单里删掉没有的 —— 删比回忆容易得多。</p>' +
+      '<button class="btn pri full" data-act="load-common">一键载入 ' + common.length + ' 件常见物品</button>' +
+      '<div class="field" style="margin:12px 0 0"><label class="fl" for="pickAge">这批东西的状态</label>' +
+      '<select class="inp" id="pickAge">' + PICK_AGE_OPTS.map(function (o) {
+        return '<option value="' + o.v + '"' + (ui.pickAge === o.v ? ' selected' : '') + '>' + o.l + '</option>';
+      }).join('') + '</select>' +
+      '<p class="hint">默认按常见使用频率预置，进清单后可以随时改。</p></div></div>';
+    h += '<input class="search" id="pickQ" placeholder="搜物品，如 面霜 / 充电宝" value="' + esc(ui.pickQ) + '">';
+    var places = ['全部'].concat(C.basePlaces().map(function (p) { return p.name; }));
+    h += '<div class="chips">' + places.map(function (p) {
+      return '<button class="chip' + (ui.pickPlace === p ? ' on' : '') + '" data-act="pick-place" data-v="' + esc(p) + '">' + esc(p) + '</button>';
+    }).join('') + '</div>';
+    h += '<div id="pickBody">' + pickBodyHTML() + '</div>';
+    h += '<button class="btn pri full" id="loadPickedBtn" data-act="load-picked">载入所选 ' + pickedCount() + ' 件</button>';
+    return h;
+  }
+
+  function renderPhoto() {
+    var h = '<div class="card">' +
+      '<div style="font-size:14px;font-weight:600;margin-bottom:6px">拍一张，剩下的交给我</div>' +
+      '<p class="hint" style="margin:0">对着柜子或抽屉拍一张，照片只存在这台手机上。' +
+      '把照片直接发到 WorkBuddy 对话里，我识别出物品后会写进这个工具，你刷新网页就能看到，不用自己录。</p>' +
+      '<label class="btn pri full" for="cameraInput" style="display:flex;margin:14px 0 10px">拍照 / 选择照片</label>' +
+      '<input type="file" id="cameraInput" accept="image/*" capture="environment" multiple hidden>' +
+      '<div class="btn-row"><button class="btn" data-act="copy-prompt">复制识别请求</button>' +
+      '<button class="btn" data-act="clear-photos">清空照片</button></div>' +
+      '<p class="hint">复制后，在对话里粘贴这句话并附上照片即可。</p></div>';
+
+    h += '<div class="sec-t"><h2>拍好的照片</h2><span class="more">' + ui.photos.length + ' 张</span></div>';
+    if (!ui.photos.length) {
+      h += '<div class="card"><div class="empty">还没拍照。<br>拍完把照片发到对话里，说「识别成清单」就行。</div></div>';
+    } else {
+      h += '<div class="photo-grid">' + ui.photos.map(function (p) {
+        return '<div class="photo-cell"><img src="' + p.data + '" alt="已拍照片">' +
+          '<button class="btn sm" data-act="del-photo" data-id="' + esc(p.id) + '">删</button></div>';
+      }).join('') + '</div>';
+    }
+
+    h += '<div class="sec-t"><h2>识别结果直接入库</h2></div><div class="card">' +
+      '<p class="hint" style="margin:0 0 10px">也可以把我返回的清单粘在这里，一行一件，点一下就入库。</p>' +
+      '<textarea class="inp" id="aiText" style="min-height:110px" placeholder="兰蔻面霜 ¥680 @卫生间镜柜 ~1年&#10;空气炸锅 ¥399 @厨房吊柜 #电器 ~2年">' + esc(ui.aiText) + '</textarea>' +
+      '<div style="margin-top:10px"><button class="btn pri full" data-act="import-ai">粘贴结果入库</button></div></div>';
+    return h;
+  }
+
+  function renderAdd() {
+    var h = header('添加物品', '不用打字：勾选、粘贴，或者拍张照');
+    h += '<div class="wrap">';
+    h += '<div class="seg">' + ADD_MODES.map(function (m) {
+      return '<button class="' + (ui.addMode === m.v ? 'on' : '') + '" data-act="add-mode" data-v="' + m.v + '">' + m.l + '</button>';
+    }).join('') + '</div>';
+
+    if (ui.addMode === 'pick') h += renderPick();
+    else if (ui.addMode === 'photo') h += renderPhoto();
+    else h += renderPaste();
+
+    if (ui.addMode !== 'photo') {
+      h += '<div class="sec-t"><h2>清点位置</h2><span class="more">清完一个勾一个</span></div><div class="card">';
+      if (!S.places.length) h += '<div class="empty">还没有位置，先加一个开始清点。</div>';
+      S.places.forEach(function (p) {
+        var cnt = S.items.filter(function (x) { return x.place === p.name; }).length;
+        h += '<div class="place-row"><button class="chk' + (p.done ? ' on' : '') + '" data-act="toggle-place" data-id="' + esc(p.id) + '" aria-label="完成"></button>' +
+          '<span class="pnm"' + (p.done ? ' style="color:var(--muted)"' : '') + '>' + esc(p.name) + '</span>' +
+          '<span class="cnt">' + cnt + ' 件</span>' +
+          '<button class="btn sm" data-act="use-place" data-name="' + esc(p.name) + '">录入</button>' +
+          '<button class="btn sm" data-act="del-place" data-id="' + esc(p.id) + '">删</button></div>';
+      });
+      h += '<div style="display:flex;gap:8px;margin-top:12px"><input class="inp" id="newPlace" placeholder="新位置，如 阳台储物柜" value="' + esc(ui.newPlace) + '" style="flex:1">' +
+        '<button class="btn" data-act="add-place" style="flex:0 0 auto">添加</button></div></div>';
+    }
     h += '</div>';
     return h;
   }
@@ -801,7 +1205,7 @@ window.CFG = (function () {
       '<input type="file" id="importFile" accept="application/json,.json" hidden></div></div>';
 
     h += '<div class="sec-t"><h2>重新开始</h2></div><div class="card">' +
-      '<div class="btn-row"><button class="btn" data-act="clear-demo">清空示例数据</button>' +
+      '<div class="btn-row"><button class="btn" data-act="clear-demo">清空内置清单</button>' +
       '<button class="btn dan" data-act="clear-all">清空全部数据</button></div>' +
       '<p class="hint">清空不可撤销，请先导出备份。</p></div>';
 
@@ -927,6 +1331,35 @@ window.CFG = (function () {
     toast(n ? '已为 ' + n + ' 件生成处置建议' : '没有待决策的物品');
   }
 
+  function updatePickedBtn() {
+    var b = $('#loadPickedBtn');
+    if (b) b.textContent = '载入所选 ' + pickedCount() + ' 件';
+  }
+
+  function commitBase(rows, ageMode) {
+    if (!rows || !rows.length) { toast('先选几件，或点「一键载入」'); return; }
+    var ids = {};
+    S.items.forEach(function (x) { ids[x.id] = 1; });
+    var fresh = C.baseItems(rows, ageMode).filter(function (x) { return !ids[x.id]; });
+    if (!fresh.length) { toast('这些已经都在清单里了'); return; }
+    fresh.forEach(function (it) { S.items.push(it); });
+    C.basePlaces().forEach(function (p) {
+      if (!S.places.some(function (x) { return x.name === p.name; })) S.places.push(p);
+    });
+    fresh.forEach(applySuggest);
+    if (S.demo) {
+      S.items = S.items.filter(function (x) { return String(x.id).indexOf('demo-') !== 0; });
+      S.demo = 0;
+    }
+    S.settings.addSinceBackup += fresh.length;
+    S.baseNotice = 0;
+    S.seedNotice = 0;
+    save();
+    ui.picked = {};
+    renderAll();
+    toast('已补入 ' + fresh.length + ' 件，去清单里把没有的删掉');
+  }
+
   function commitBulk(items, mode) {
     if (!items.length) { toast('先粘贴几行物品'); return; }
     items.forEach(function (it) { S.items.push(it); });
@@ -1023,9 +1456,10 @@ window.CFG = (function () {
         break;
       }
       case 'clear-demo': {
-        if (!confirm('清空示例数据，开始记录自己家的物品？')) break;
-        S.items = S.items.filter(function (x) { return String(x.id).indexOf('demo-') !== 0; });
-        S.demo = 0; save(); renderAll(); toast('已清空示例，去「录入」开始吧'); break;
+        if (!confirm('清空内置的常见物品和演示数据，只保留你自己添加的？')) break;
+        S.items = S.items.filter(function (x) { return !/^(demo-|base-)/.test(String(x.id)); });
+        S.demo = 0; S.baseNotice = 0;
+        save(); renderAll(); toast('已清空内置清单'); break;
       }
       case 'clear-all': {
         if (!confirm('将清空全部 ' + S.items.length + ' 件物品和位置，确定吗？建议先导出备份。')) break;
@@ -1071,6 +1505,51 @@ window.CFG = (function () {
       }
       case 'export-json': exportJSON(); break;
       case 'export-csv': exportCSV(); break;
+      case 'add-mode': ui.addMode = el.getAttribute('data-v'); renderAll(); break;
+      case 'load-common': commitBase(C.BASE_ROWS.filter(function (r) { return r.common; }), ui.pickAge); break;
+      case 'load-picked': {
+        var chosenRows = C.BASE_ROWS.filter(function (r) { return ui.picked[r.id]; });
+        commitBase(chosenRows, ui.pickAge);
+        break;
+      }
+      case 'pick-group': {
+        var gp = el.getAttribute('data-place');
+        pickRows().forEach(function (r) { if (r.place === gp) ui.picked[r.id] = 1; });
+        var pbody = $('#pickBody');
+        if (pbody) pbody.innerHTML = pickBodyHTML();
+        updatePickedBtn();
+        break;
+      }
+      case 'pick-place': ui.pickPlace = el.getAttribute('data-v'); renderAll(); break;
+      case 'dismiss-seed': S.seedNotice = 0; save(); renderAll(); break;
+      case 'dismiss-base': S.baseNotice = 0; save(); renderAll(); break;
+      case 'replace-demo': {
+        if (!confirm('用内置常见物品清单替换演示数据？')) break;
+        S.items = S.items.filter(function (x) { return String(x.id).indexOf('demo-') !== 0; });
+        S.demo = 0;
+        commitBase(C.BASE_ROWS.filter(function (r) { return r.common; }), 'auto');
+        break;
+      }
+      case 'copy-prompt': copyText(AI_PROMPT); break;
+      case 'clear-photos': {
+        if (!ui.photos.length) { toast('还没有照片'); break; }
+        if (!confirm('清空所有已拍照片？')) break;
+        clearPhotoDB().then(function () { ui.photos = []; renderAll(); toast('已清空照片'); })
+          .catch(function () { toast('清空失败'); });
+        break;
+      }
+      case 'del-photo': {
+        delPhoto(id).then(allPhotos).then(function (ps) { ui.photos = ps || []; renderAll(); })
+          .catch(function () { toast('删除失败'); });
+        break;
+      }
+      case 'import-ai': {
+        var aiTxt = (($('#aiText') || {}).value || ui.aiText || '').trim();
+        if (!aiTxt) { toast('先粘贴识别结果'); break; }
+        ui.aiText = '';
+        commitBulk(parseBulk(aiTxt, '照片识别'), 'ai');
+        break;
+      }
     }
   }
 
@@ -1099,6 +1578,12 @@ window.CFG = (function () {
     if (t.id === 'draft') ui.draft = t.value;
     else if (t.id === 'defPlace') ui.defPlace = t.value;
     else if (t.id === 'newPlace') ui.newPlace = t.value;
+    else if (t.id === 'aiText') ui.aiText = t.value;
+    else if (t.id === 'pickQ') {
+      ui.pickQ = t.value;
+      var pb = $('#pickBody');
+      if (pb) pb.innerHTML = pickBodyHTML();
+    }
     else if (t.id === 'q') {
       ui.q = t.value;
       var lb = $('#listBody');
@@ -1109,6 +1594,15 @@ window.CFG = (function () {
   document.addEventListener('change', function (e) {
     var t = e.target;
     if (t.id === 'defAge') ui.defAge = t.value;
+    else if (t.id === 'pickAge') ui.pickAge = t.value;
+    else if (t.id === 'cameraInput' && t.files && t.files.length) {
+      handlePhotos(t.files);
+      t.value = '';
+    }
+    else if (t.getAttribute && t.getAttribute('data-pick')) {
+      ui.picked[t.getAttribute('data-pick')] = t.checked ? 1 : 0;
+      updatePickedBtn();
+    }
     else if (t.id === 'importFile' && t.files && t.files[0]) {
       importJSON(t.files[0]);
       t.value = '';
@@ -1124,6 +1618,7 @@ window.CFG = (function () {
   curTab = TABS.indexOf(initial) >= 0 ? initial : 'today';
   load();
   renderAll();
+  refreshPhotos();
 })();
 </script>
 </body>
