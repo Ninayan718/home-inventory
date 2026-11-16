@@ -118,7 +118,7 @@ textarea.inp{min-height:150px;resize:vertical;line-height:1.7;font-size:14px}
 .tiny{font-size:12px;color:var(--muted)}
 .divider{height:1px;background:var(--line);margin:14px 0}
 .tabbar{
-  position:fixed;left:0;right:0;bottom:0;z-index:30;display:grid;grid-template-columns:repeat(4,1fr);
+  position:fixed;left:0;right:0;bottom:0;z-index:30;display:grid;grid-template-columns:repeat(5,1fr);
   background:rgba(255,255,255,.97);border-top:1px solid var(--line);
   padding:6px 4px calc(6px + env(safe-area-inset-bottom));
 }
@@ -149,6 +149,10 @@ textarea.inp{min-height:150px;resize:vertical;line-height:1.7;font-size:14px}
 .photo-cell img{display:block;width:100%;height:104px;object-fit:cover}
 .photo-cell .btn{position:absolute;right:4px;bottom:4px;min-height:24px;padding:2px 8px;font-size:11px;background:rgba(255,255,255,.94)}
 .banner.green{background:var(--green-soft);border-color:#CBE4D4;color:#1F5A40}
+.want-row{display:flex;align-items:flex-start;gap:7px;padding:10px 0;border-top:1px solid var(--line)}
+.want-row .tx{flex:1;min-width:0;font-size:14px;line-height:1.45}
+.want-row .tx small{display:block;color:var(--muted);font-size:12px;margin-top:3px}
+.want-row .btn{flex:0 0 auto;padding:5px 8px;font-size:11px}
 </style>
 </head>
 <body>
@@ -204,7 +208,7 @@ window.CFG = (function () {
     ['维生素', '药品'], ['保健品', '药品'], ['创可贴', '药品'], ['退烧药', '药品'],
     ['感冒药', '药品'], ['钙片', '药品'], ['口罩', '药品'], ['药箱', '药品'], ['药', '药品'],
     ['羽绒服', '衣物'], ['冲锋衣', '衣物'], ['衬衫', '衣物'], ['外套', '衣物'],
-    ['毛衣', '衣物'], ['裤子', '衣物'], ['裙子', '衣物'], ['袜子', '衣物'],
+    ['毛衣', '衣物'], ['裤子', '衣物'], ['连衣裙', '衣物'], ['半身裙', '衣物'], ['裙子', '衣物'], ['袜子', '衣物'],
     ['内衣', '衣物'], ['围巾', '衣物'], ['帽子', '衣物'], ['背包', '衣物'],
     ['皮带', '衣物'], ['运动鞋', '衣物'], ['T恤', '衣物'], ['包', '衣物'], ['鞋', '衣物'],
     ['螺丝刀', '工具'], ['工具箱', '工具'], ['钳子', '工具'], ['胶带', '工具'],
@@ -451,7 +455,7 @@ window.CFG = (function () {
 
   var C = window.CFG;
   var KEY = 'wjy_inventory_v1';
-  var TABS = ['today', 'list', 'add', 'data'];
+  var TABS = ['today', 'list', 'method', 'add', 'data'];
   var S = null;
   var curTab = 'today';
   var ui = {
@@ -459,7 +463,8 @@ window.CFG = (function () {
     draft: '', defPlace: '', defAge: '365', newPlace: '',
     preview: null, editId: null, focusQ: false,
     addMode: 'paste', pickQ: '', pickPlace: '全部', pickAge: 'auto',
-    picked: {}, aiText: '', photos: [], seedNotice: 0
+    picked: {}, aiText: '', photos: [], seedNotice: 0,
+    wantName: '', wantPrice: '', wantDays: '3'
   };
 
   var AI_PROMPT = '请识别这张照片里的所有物品，每行一件，按「名称 ¥原价 @位置 ~闲置时长」输出，不要编号、不要解释。\n' +
@@ -469,10 +474,11 @@ window.CFG = (function () {
   var ICONS = {
     today: '<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5.5 9.5V20h13V9.5"/><path d="M9.5 20v-6h5v6"/></svg>',
     list: '<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M8 6h13M8 12h13M8 18h13"/><circle cx="3.5" cy="6" r="1"/><circle cx="3.5" cy="12" r="1"/><circle cx="3.5" cy="18" r="1"/></svg>',
+    method: '<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12M6 21h12"/><path d="M7 3c0 4 5 5 5 9s-5 5-5 9"/><path d="M17 3c0 4-5 5-5 9s5 5 5 9"/></svg>',
     add: '<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>',
     data: '<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16"/><path d="M6 20v-6M11 20V7M16 20v-9M21 20v-4"/></svg>'
   };
-  var TAB_LABEL = { today: '今天', list: '清单', add: '录入', data: '数据' };
+  var TAB_LABEL = { today: '今天', list: '清单', method: '方法', add: '录入', data: '数据' };
 
   function $(s) { return document.querySelector(s); }
   function esc(s) {
@@ -535,7 +541,7 @@ window.CFG = (function () {
 
   function blankState() {
     return {
-      version: 1, items: [], places: [], demo: 0, createdAt: today(),
+      version: 1, items: [], places: [], wants: [], demo: 0, createdAt: today(),
       seedVersion: '', seeded: 0, baseNotice: 0, seedNotice: 0,
       settings: { addSinceBackup: 0, lastBackupAt: '' }
     };
@@ -629,6 +635,7 @@ window.CFG = (function () {
 
   function ensureShape() {
     if (!S.places) S.places = [];
+    if (!S.wants) S.wants = [];
     if (!S.settings) S.settings = { addSinceBackup: 0, lastBackupAt: '' };
     if (S.seedVersion === undefined) S.seedVersion = '';
     if (S.seeded === undefined) S.seeded = 0;
@@ -746,6 +753,107 @@ window.CFG = (function () {
 
   function badge(label, tone) { return '<span class="badge ' + tone + '">' + esc(label) + '</span>'; }
 
+  function wantStats() {
+    var waiting = S.wants.filter(function (w) { return w.status === 'waiting'; });
+    var skipped = S.wants.filter(function (w) { return w.status === 'skipped'; });
+    var bought = S.wants.filter(function (w) { return w.status === 'bought'; });
+    return {
+      waiting: waiting, skipped: skipped.length, bought: bought.length,
+      saved: skipped.reduce(function (a, b) { return a + (Number(b.price) || 0); }, 0),
+      spent: bought.reduce(function (a, b) { return a + (Number(b.price) || 0); }, 0),
+      rate: pct(skipped.length, skipped.length + bought.length)
+    };
+  }
+
+  function similarWant(name) {
+    var n = String(name || '').trim().toLowerCase();
+    if (!n) return null;
+    var hits = S.items.filter(function (x) {
+      return !x.done && (x.name.toLowerCase().indexOf(n) >= 0 || n.indexOf(x.name.toLowerCase()) >= 0);
+    });
+    var cat = guessCat(n);
+    var catItems = S.items.filter(function (x) { return !x.done && x.cat === cat; });
+    return {
+      hits: hits, cat: cat, count: catItems.length,
+      names: catItems.slice(0, 2).map(function (x) { return x.name; })
+    };
+  }
+
+  function wantHintHTML() {
+    var sw = similarWant(ui.wantName);
+    if (!sw) return '写下这一刻想买的东西。不用马上决定，先过去看看。';
+    if (sw.hits.length) {
+      return '<span style="color:var(--red)">清单里已经有「' +
+        esc(sw.hits.slice(0, 2).map(function (x) { return x.name; }).join('」「')) +
+        '」' + (sw.hits.length > 2 ? ' 等 ' + sw.hits.length + ' 件' : '') + '，家里有就不买。</span>';
+    }
+    if (sw.count >= 3) {
+      return '<span style="color:var(--amber)">家里同类（' + esc(sw.cat) + '）已有 ' + sw.count + ' 件' +
+        (sw.names.length ? '，如 ' + esc(sw.names.join('、')) : '') + '，再买就是囤货了。</span>';
+    }
+    if (sw.count > 0) return '家里同类（' + esc(sw.cat) + '）已有 ' + sw.count + ' 件，买前看一眼清单。';
+    return '清单里还没有这类东西。想清楚再买也不迟。';
+  }
+
+  function renderMethod() {
+    var ws = wantStats();
+    var h = header('方法', '不用当苦行僧，每次冲动前多停顿一秒');
+    h += '<div class="wrap">';
+
+    h += '<div class="card">' +
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">' +
+      '<span style="font-size:14px;font-weight:600">克制冲动消费 · 先停一秒</span>' + badge('核心', 'amber') + '</div>' +
+      '<p class="hint" style="margin:0 0 10px">把想买的先写下来，过几天还想要再买。多数时候，你会忘记。</p>' +
+      '<div style="display:flex;gap:8px">' +
+      '<input class="inp" id="wantName" placeholder="现在想买什么？" value="' + esc(ui.wantName) + '" style="flex:1;min-width:0">' +
+      '<input class="inp" id="wantPrice" type="number" inputmode="decimal" placeholder="¥ 价格" value="' + esc(ui.wantPrice) + '" style="flex:0 0 88px">' +
+      '</div>' +
+      '<p class="hint" id="wantHint" style="margin:6px 0 0;line-height:1.6">' + wantHintHTML() + '</p>' +
+      '<div style="display:flex;gap:8px;margin-top:9px">' +
+      '<select class="inp" id="wantDays" style="flex:0 0 106px;min-height:40px">' +
+      [['1', '等 1 天'], ['3', '等 3 天'], ['7', '等 7 天']].map(function (o) {
+        return '<option value="' + o[0] + '"' + (ui.wantDays === o[0] ? ' selected' : '') + '>' + o[1] + '</option>';
+      }).join('') + '</select>' +
+      '<button class="btn pri" data-act="want-add" style="flex:1">记下来，先等等</button></div>';
+
+    if (ws.waiting.length) {
+      ws.waiting.slice().sort(function (a, b) { return String(a.until).localeCompare(String(b.until)); }).forEach(function (w) {
+        var left = dayDiff(today(), w.until);
+        var dl = left < 0 ? '已到期，可以决定了' : (left === 0 ? '今天到期' : '还剩 ' + left + ' 天');
+        h += '<div class="want-row"><div class="tx">' + esc(w.name) +
+          '<small>' + (Number(w.price) ? money(w.price) + ' · ' : '') + '已等 ' + Math.max(0, dayDiff(w.createdAt, today())) + ' 天 · ' + dl + '</small></div>' +
+          '<button class="btn sm" data-act="want-skip" data-id="' + esc(w.id) + '">忍住了</button>' +
+          '<button class="btn sm" data-act="want-bought" data-id="' + esc(w.id) + '">还是买了</button></div>';
+      });
+    } else {
+      h += '<div class="empty" style="padding:16px 8px">现在是冷静期，没有要决定的购买。</div>';
+    }
+    if (ws.skipped + ws.bought > 0) {
+      h += '<p class="hint" style="margin:8px 0 0;color:#0F6E56">已忍住 ' + ws.skipped + ' 次 · 省下 ' + money(ws.saved) +
+        '　（留一点想买的自由，不逼自己苦行）</p>';
+    }
+    h += '</div>';
+
+    h += '<div class="sec-t"><h2>断舍离 · 一柜一柜来</h2></div><div class="card">' +
+      '<p class="hint" style="margin:0 0 10px;line-height:1.8">' +
+      '1. 每次只碰一个位置，今天只处理 1 件<br>' +
+      '2. 吊牌还在 + 一年没穿 → 先挂转卖，别急着扔<br>' +
+      '3. 舍不得丢 → 给自己 7 天试卖期，卖不掉再说<br>' +
+      '4. 处理完记一句「舍掉之后的感觉」，慢慢就轻了</p>' +
+      '<button class="btn full" data-act="method-filter" data-v="idle">看闲置清单，先处理一件</button></div>';
+
+    h += '<div class="sec-t"><h2>物尽其用 · 让已有的先用完</h2></div><div class="card">' +
+      '<p class="hint" style="margin:0 0 10px;line-height:1.8">' +
+      '· 已过期 → 直接丢，别心疼<br>' +
+      '· 90 天内到期 → 放到最顺手的位置，优先用完<br>' +
+      '· 未拆封同类多件 → 留一件用，多余的转卖<br>' +
+      '· 买之前先搜清单，家里有就不买</p>' +
+      '<button class="btn full" data-act="method-filter" data-v="expiring">看快过期的物品</button></div>';
+
+    h += '</div>';
+    return h;
+  }
+
   function renderToday() {
     var st = stats();
     var h = header('家里有什么', '物尽其用 · 共 ' + st.total + ' 件 · 闲置率 ' + st.idleRate + '%');
@@ -776,6 +884,16 @@ window.CFG = (function () {
       '<div class="metric hot"><p class="lb">闲置</p><p class="vl">' + st.idle + '</p><p class="sub">含未拆封</p></div>' +
       '<div class="metric"><p class="lb">沉淀原价</p><p class="vl" style="font-size:19px">' + money(st.sunk) + '</p><p class="sub">未在用物品</p></div>' +
       '</div>';
+
+    var ws = wantStats();
+    h += '<div class="card" style="background:#FBF5EA;border-color:#EFE0C6">' +
+      '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px">' +
+      '<div style="font-size:13px;font-weight:600">手痒了？先停一秒</div>' +
+      (ws.skipped ? badge('已省 ' + money(ws.saved), 'green') : badge('不用当苦行僧', 'amber')) + '</div>' +
+      '<p class="hint" style="margin:6px 0 10px">' +
+      (ws.waiting.length ? '有 ' + ws.waiting.length + ' 件想买的东西正在冷静期，' : '写下想买的，过几天还想要再买。') +
+      '每次冲动前多停顿一秒，就算数。</p>' +
+      '<button class="btn full" data-act="goto" data-tab="method">去「方法」页，记下这一刻的冲动</button></div>';
 
     h += '<div class="sec-t"><h2>今天做这 3 件事</h2><span class="more">只挑最要紧的</span></div><div class="card">';
     var todos = todoItems();
@@ -835,6 +953,7 @@ window.CFG = (function () {
         case 'idle': return !it.done && it.status !== 'using';
         case 'sell': return !it.done && it.action === 'sell';
         case 'use': return !it.done && it.action === 'use';
+        case 'expiring': return !it.done && paoLeft(it) !== null && paoLeft(it) <= 90;
         case 'done': return !!it.done;
         default: return !it.done;
       }
@@ -881,7 +1000,7 @@ window.CFG = (function () {
     h += chipRow([
       { v: 'all', l: '全部' }, { v: 'pending', l: '待决策 ' + st.pending },
       { v: 'idle', l: '闲置' }, { v: 'sell', l: '待卖 ' + st.toSell },
-      { v: 'use', l: '用起来' }, { v: 'done', l: '已归档' }
+      { v: 'use', l: '用起来' }, { v: 'expiring', l: '临期/过期' }, { v: 'done', l: '已归档' }
     ], 'filter', 'filter');
     h += chipRow([{ v: 'cat', l: '按类目' }, { v: 'place', l: '按位置' }, { v: 'none', l: '不分组' }], 'group', 'group');
     h += chipRow([{ v: 'idle', l: '闲置最久' }, { v: 'price', l: '金额最高' }, { v: 'new', l: '最近添加' }], 'sort', 'sort');
@@ -1189,6 +1308,13 @@ window.CFG = (function () {
       '<div class="kv"><span>已回款</span><span>' + money(st.sold) + '</span></div>' +
       '<div class="kv"><span>本月已用起</span><span>' + st.usedUp + ' 件</span></div></div>';
 
+    var ws = wantStats();
+    h += '<div class="sec-t"><h2>冲动账本</h2><span class="more">看清钱花在哪</span></div><div class="card">' +
+      '<div class="kv"><span>冷静中</span><span>' + ws.waiting.length + ' 件</span></div>' +
+      '<div class="kv"><span>还是买了</span><span>' + ws.bought + ' 件 · 花了 ' + money(ws.spent) + '</span></div>' +
+      '<div class="kv"><span>忍住了</span><span>' + ws.skipped + ' 次 · 省下 ' + money(ws.saved) + '</span></div>' +
+      '<div class="kv"><span>忍住率</span><span>' + ws.rate + '%</span></div></div>';
+
     h += '<div class="sec-t"><h2>按位置 · 哪个柜子是黑洞</h2></div><div class="card">';
     if (!st.places.length) h += '<div class="empty">还没有物品</div>';
     st.places.slice(0, 10).forEach(function (p) {
@@ -1232,6 +1358,7 @@ window.CFG = (function () {
   function renderAll() {
     var app = $('#app');
     if (curTab === 'list') app.innerHTML = renderList();
+    else if (curTab === 'method') app.innerHTML = renderMethod();
     else if (curTab === 'add') app.innerHTML = renderAdd();
     else if (curTab === 'data') app.innerHTML = renderData();
     else app.innerHTML = renderToday();
@@ -1550,6 +1677,41 @@ window.CFG = (function () {
         commitBulk(parseBulk(aiTxt, '照片识别'), 'ai');
         break;
       }
+      case 'method-filter': ui.filter = el.getAttribute('data-v'); ui.q = ''; ui.group = 'none'; go('list'); break;
+      case 'want-add': {
+        var wn = (($('#wantName') || {}).value || ui.wantName || '').trim();
+        if (!wn) { toast('先写下想买什么'); break; }
+        var wp = Number(($('#wantPrice') || {}).value) || 0;
+        var wd = Number(($('#wantDays') || {}).value) || 3;
+        S.wants.push({
+          id: uid(), name: wn, price: wp, createdAt: today(),
+          until: C.dayOffset(wd), status: 'waiting', decidedAt: ''
+        });
+        ui.wantName = ''; ui.wantPrice = '';
+        save(); renderAll();
+        toast('记下了，' + wd + ' 天后再决定。多数时候你已经不想要了');
+        break;
+      }
+      case 'want-skip': {
+        var wsk = S.wants.filter(function (x) { return x.id === id; })[0];
+        if (wsk) {
+          wsk.status = 'skipped'; wsk.decidedAt = today();
+          save(); renderAll();
+          toast('忍住 +1' + (Number(wsk.price) ? '，省下 ' + money(wsk.price) : ''));
+        }
+        break;
+      }
+      case 'want-bought': {
+        var wbg = S.wants.filter(function (x) { return x.id === id; })[0];
+        if (!wbg) break;
+        wbg.status = 'bought'; wbg.decidedAt = today();
+        var line = wbg.name + (Number(wbg.price) ? ' ¥' + wbg.price : '') + ' @新买的 ~在用';
+        var wi = parseBulk(line, '新买的')[0];
+        if (wi) S.items.push(wi);
+        save(); renderAll();
+        toast('想清楚了就买，不亏。已顺手记进清单');
+        break;
+      }
     }
   }
 
@@ -1579,6 +1741,12 @@ window.CFG = (function () {
     else if (t.id === 'defPlace') ui.defPlace = t.value;
     else if (t.id === 'newPlace') ui.newPlace = t.value;
     else if (t.id === 'aiText') ui.aiText = t.value;
+    else if (t.id === 'wantName') {
+      ui.wantName = t.value;
+      var wh = $('#wantHint');
+      if (wh) wh.innerHTML = wantHintHTML();
+    }
+    else if (t.id === 'wantPrice') ui.wantPrice = t.value;
     else if (t.id === 'pickQ') {
       ui.pickQ = t.value;
       var pb = $('#pickBody');
@@ -1595,6 +1763,7 @@ window.CFG = (function () {
     var t = e.target;
     if (t.id === 'defAge') ui.defAge = t.value;
     else if (t.id === 'pickAge') ui.pickAge = t.value;
+    else if (t.id === 'wantDays') ui.wantDays = t.value;
     else if (t.id === 'cameraInput' && t.files && t.files.length) {
       handlePhotos(t.files);
       t.value = '';
